@@ -22,7 +22,29 @@
   },
   "homepage": "https://github.com/LastShadowPL/querify#readme",
   "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@types/jest": "^23.3.2",
+    "babel-core": "^6.26.3",
+    "babel-jest": "^23.4.2",
+    "ts-jest": "^23.0.1",
     "ts-node": "^7.0.1",
     "typescript": "^3.0.3"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  },
+  "dependencies": {
+    "jest": "^23.5.0"
   }
 }
