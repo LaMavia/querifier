@@ -146,21 +146,21 @@ describe("$max", () => {
 describe("$mul", () => {
   it("Multiplies target's prop", () => {
     const o = {a: 1}
-    expect(update(o, { $mul: { a: 2 } }).a).toBe(3)
+    expect(update(o, { $mul: { a: 2 } }).a).toBe(2)
   })
 
   it("Accepts negative numbers", () => {
     const o = {a: 2}
-    expect(update(o, { $inc: { a: -2 } }).a).toBe(0)
+    expect(update(o, { $mul: { a: -2 } }).a).toBe(-4)
   })
 
   it("Doesn't change when called with NaN", () => {
     const o = {a: 2}
-    expect(update(o, { $inc: { a: "String here" } }).a).toBe(2)
-    expect(update(o, { $inc: { a: {} } }).a).toBe(2)
-    expect(update(o, { $inc: { a: NaN } }).a).toBe(2)
-    expect(update(o, { $inc: { a: "String" } }).a).toBe(2)
-    expect(update(o, { $inc: { a: [] } }).a).toBe(2)
+    expect(update(o, { $mul: { a: "String here" } }).a).toBe(2)
+    expect(update(o, { $mul: { a: {} } }).a).toBe(2)
+    expect(update(o, { $mul: { a: NaN } }).a).toBe(2)
+    expect(update(o, { $mul: { a: "String" } }).a).toBe(2)
+    expect(update(o, { $mul: { a: [] } }).a).toBe(2)
   })
 
   it("Doesn't mutate the target", () => {
@@ -169,3 +169,45 @@ describe("$mul", () => {
     expect(o.a).toBe(0)
   })
 })
+
+describe("$rename", () => {
+  it("Changes the key", () => {
+    const o = {oldKey: 2}
+    expect(update(o, { $rename: { oldKey: "newKey" } })).toEqual({ newKey: 2 })
+  })
+
+  it("Doesn't accept invalid keys", () => {
+    const o = {a: 1}
+    expect(update(o, { $rename: {a: () => {}} })).toEqual({a: 1})
+    expect(update(o, { $rename: {a: undefined} })).toEqual({a: 1})
+    expect(update(o, { $rename: {a: null} })).toEqual({a: 1})
+    expect(update(o, { $rename: {a: []} })).toEqual({a: 1})
+  })
+
+  it("Doesn't mutate the target", () => {
+    const o = {a: 0};
+    update(o, { $rename: { a: 'b' } })
+    expect(o.a).toBe(0)
+    // @ts-ignore
+    expect(o.b).toBeUndefined()
+  })
+}) 
+
+describe("$unset", () => {
+  it("Deletes defined prop", () => {
+    const o = {a: 1}
+    expect(update(o, { $unset: { a: 0 } })).toEqual({})
+  })
+
+  it("Doesn't fail when prop is undefined", () => {
+    const o = {}
+    expect(update(o, { $unset: { a: 0 } })).toEqual({})
+  })
+
+  it("Doesn't mutate the target", () => {
+    const o = {a: 0};
+    update(o, { $unset: { a: '' } })
+    expect(o.a).toBe(0)
+  })
+})
+

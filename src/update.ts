@@ -1,5 +1,17 @@
-import { throwError, ObjectLit, Query, exception } from ".";
+import { throwError, ObjectLit, exception } from ".";
 import { isArray } from "./checkers";
+
+export interface UpdateQuery {
+  [key: string]: any
+  $addToSet?: ObjectLit
+  $set?: ObjectLit
+  $inc?: ObjectLit
+  $min?: ObjectLit
+  $max?: ObjectLit
+  $mul?: ObjectLit
+  $rename?: ObjectLit
+  $unset?: ObjectLit 
+}
 
 const dictionary = {
 	$addToSet: <T extends ObjectLit>(target: T) => (
@@ -110,7 +122,7 @@ const dictionary = {
 
       try {
         target[prop] = target[prop]
-          ? target[prop] * obj[prop]
+          ? target[prop] * (obj[prop] || 1)
           : 0
       } 
       catch (e) {
@@ -120,9 +132,37 @@ const dictionary = {
     
     return target
   },
+
+  $rename: <T extends ObjectLit>(target: T) => (
+		obj: ObjectLit = throwError()
+  ) => {
+    const validsKeys = ["symbol", "string", "number"]
+    for (const oldKey in obj) {
+      let val
+      const newKey = obj[oldKey]
+      if (!validsKeys.some(x => x === typeof newKey) || !newKey) {
+        exception(`[$rename]> ${obj[oldKey]} isn't a valid key`)
+        continue
+      }
+      if (target[oldKey]) {
+        val = target[oldKey]
+        delete target[oldKey]
+      }
+      Object.assign(target, { [newKey]: val })
+    }
+
+    return target
+  },
+
+  $unset: <T extends ObjectLit>(target: T) => (
+		obj: ObjectLit = throwError()
+  ) => {
+    for(const key in obj) (key in target)&& delete target[key]
+    return target
+  }
 }
 
-export const update = <T extends ObjectLit>(object: T, query: Query): T => {
+export const update = <T extends ObjectLit>(object: T, query: UpdateQuery): T => {
   const target = JSON.parse(JSON.stringify(object))
 	for (const prop in query) {
     if (prop in dictionary) {
