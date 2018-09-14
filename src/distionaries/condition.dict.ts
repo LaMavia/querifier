@@ -13,8 +13,8 @@ export interface ConditionQuery {
   $gte?: any
   $lt?:  any
   $lte?: any
-  $in?:  any
-  $nin?: any
+  $in?:  any[]
+  $nin?: any[]
 }
 
 export const conditionDictionary = {

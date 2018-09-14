@@ -1,6 +1,7 @@
 import { ObjectLit, exception, throwError } from "..";
 import { isArray } from "../checkers";
 import { conditionDictionary, ConditionQuery, Conditionable } from "./condition.dict";
+import { ArrayQuery, arrayDictionary, Arrayable } from "./array.dict";
 
 export interface UpdateQuery {
   [key: string]: any
@@ -13,6 +14,8 @@ export interface UpdateQuery {
   $unset?: ObjectLit 
   $addToSet?: ObjectLit
   $pull?: Conditionable
+  $pop?: {[key: string]: number}
+  $push?: Arrayable
 }
 
 export const dictionary = {
@@ -200,7 +203,58 @@ export const dictionary = {
       try {
         target[arrayName] = array
       } catch (e) {
-        exception(`[$pull]> Error setting value of ${arrayName}`)
+        exception(`[$pull]> Error setting value of "${arrayName}"`)
+      }
+    }
+
+    return target
+  },
+
+  $pop: <T extends ObjectLit>(target: T) => (
+		query: ObjectLit & ConditionQuery = throwError()
+	) => {
+    for(const key in query) {
+      const array = [...target[key]] as any[]
+      if(isArray(array)) {
+        switch (query[key]) {
+          case -1: array.shift();break;
+          case 1: array.pop();break;
+          default:;break;
+        }
+        
+        try {
+          target[key] = array
+        } catch (e) {
+          exception(`[$pop]> Error setting value of "${key}"`)
+        }
+      }
+    }
+
+    return target
+  },
+
+  $push: <T extends ObjectLit>(target: T) => (
+		query: ObjectLit & ArrayQuery = throwError()
+	) => {
+    for(const key in query) {
+      let array = [...target[key]] as any[]
+      if(typeof query[key] === "object") {
+        for(const mod in query[key]) {
+          if(mod in arrayDictionary) {
+            // @ts-ignore
+            array = arrayDictionary[mod](array)(query[key][mod]) || array
+          } else {
+            array.push(query[key][mod])
+          }
+        }
+      } else {
+        array.push(query[key])
+      }
+
+      try {
+        target[key] = array
+      } catch (e) {
+        exception(`[$push]> Error setting value of "${key}"`)
       }
     }
 

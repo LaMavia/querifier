@@ -226,7 +226,7 @@ describe("$pull", () => {
     expect(update(o, { $pull: { a: { $in: [2, 3] } } }).a).toEqual([1])
   })
 
-  it("Works with $in", () => {
+  it("Works with $nin", () => {
     expect(update(o, { $pull: { a: { $nin: [1, 2] } } }).a).toEqual([1, 2])
   })
   
@@ -254,6 +254,50 @@ describe("$pull", () => {
     expect(update(o, { $pull: { a: { $lte: 2 } } }).a).toEqual([3])
   })
 
+  it("Doesn't mutate the target", () => {
+    update(o, { $pull: { a: { $lte: 2 } } })
+    expect(o).toEqual({ a: [1, 2, 3], b: ["a", "b"] })
+  })
 })
+
+describe("$pop", () => {
+  it("Pops element", () => {
+    const o = {a: [1, 2, 3, 4]}
+    expect(update(o, { $pop: {a: 1} }).a).toEqual([1, 2, 3])
+    expect(update(o, { $pop: {a: -1} }).a).toEqual([2, 3, 4])
+  })
+
+  it("Doesn't change the array when called with a invalid value", () => {
+    const o = {a: [1, 2, 3, 4]}
+    expect(update(o, { $pop: {a: 54} }).a).toEqual([1, 2, 3, 4])
+    expect(update(o, { $pop: {a: -54} }).a).toEqual([1, 2, 3, 4])
+  })
+
+  it("Doesn't mutate the target", () => {
+    const o = {a: [1, 2, 3, 4]}
+    update(o, { $pop: {a: 1} })
+    expect(o.a).toEqual([1, 2, 3, 4])
+  })
+})
+
+describe("$push", () => {
+  it("Pushes an item", () => {
+    const o = {a: [1, 2]}
+    expect(update(o, { $push: {a: 3} }).a).toEqual([1, 2, 3])
+  })
+
+  it("Works with $each", () => {
+    const o = {a: [1]}
+    expect(update(o, { $push: {a: {$each: [2, 3]}} }).a).toEqual([1, 2, 3])
+  })
+
+  it("Doesn't mutate the target", () => {
+    const o = {a: [1, 2, 3, 4]}
+    update(o, { $push: {a: 1} })
+    expect(o.a).toEqual([1, 2, 3, 4])
+  })
+})
+
+
 
 
