@@ -21,8 +21,11 @@ describe('$addToSet', () => {
       arr2: []
     }
     expect(update(o, { $addToSet: { arr1: 1, arr2: 2 } })).toEqual({ arr1: [1], arr2: [2] })
-    // @ts-ignore
-    // expect(update(o, { $addToSet: { arr1: 1 }, $addToSet: { arr2: 2 } })).toEqual({ arr1: [1], arr2: [2] })
+  })
+
+  it("Doesn't add duplicates", () => {
+    const o = {a: [1], b: ["Hi"]}
+    expect(update(o, { $addToSet: { a: 1, b: "Hi" } })).toEqual({a: [1], b: ["Hi"]})
   })
 
   it("Doesn't change on number", () => {
@@ -210,4 +213,47 @@ describe("$unset", () => {
     expect(o.a).toBe(0)
   })
 })
+
+describe("$pull", () => {
+  const o = { a: [1, 2, 3], b: ["a", "b"] }
+
+  it("Pulls out single item", () => {
+    expect(update(o, { $pull: { a: 2 } }).a).toEqual([1, 3])
+    expect(update(o, { $pull: { b: "a" } }).b).toEqual(["b"])
+  })
+
+  it("Works with $in", () => {
+    expect(update(o, { $pull: { a: { $in: [2, 3] } } }).a).toEqual([1])
+  })
+
+  it("Works with $in", () => {
+    expect(update(o, { $pull: { a: { $nin: [1, 2] } } }).a).toEqual([1, 2])
+  })
+  
+  it("Works with $eq", () => {
+    expect(update(o, { $pull: { a: { $eq: 2 } } }).a).toEqual([1, 3])
+  })
+
+  it("Works with $ne", () => {
+    expect(update(o, { $pull: { a: { $ne: 2 } } }).a).toEqual([2])
+  })
+
+  it("Works with $gt", () => {
+    expect(update(o, { $pull: { a: { $gt: 1 } } }).a).toEqual([1])
+  })
+
+  it("Works with $gte", () => {
+    expect(update(o, { $pull: { a: { $gte: 1 } } }).a).toEqual([])
+  })
+
+  it("Works with $lt", () => {
+    expect(update(o, { $pull: { a: { $lt: 2 } } }).a).toEqual([2, 3])
+  })
+
+  it("Works with $lte", () => {
+    expect(update(o, { $pull: { a: { $lte: 2 } } }).a).toEqual([3])
+  })
+
+})
+
 
