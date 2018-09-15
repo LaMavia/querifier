@@ -1,4 +1,4 @@
-import { ObjectLit, exception, throwError } from "..";
+import { ObjectLit, exception, throwError } from "../index";
 import { isArray } from "../checkers";
 import { conditionDictionary, ConditionQuery, Conditionable } from "./condition.dict";
 import { ArrayQuery, arrayDictionary, Arrayable } from "./array.dict";

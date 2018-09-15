@@ -1,4 +1,4 @@
-import { update } from "../src/update"
+import { update } from "../src/"
 
 describe('$addToSet', () => {
   it("Adds 1 to an array", () => {
@@ -215,7 +215,7 @@ describe("$unset", () => {
 })
 
 describe("$pull", () => {
-  const o = { a: [1, 2, 3], b: ["a", "b"] }
+  const o = { a: [1, 2, 3], b: ["a", "b"], c: [1, 5, 15] }
 
   it("Pulls out single item", () => {
     expect(update(o, { $pull: { a: 2 } }).a).toEqual([1, 3])
@@ -254,9 +254,43 @@ describe("$pull", () => {
     expect(update(o, { $pull: { a: { $lte: 2 } } }).a).toEqual([3])
   })
 
+  it("Works with $and", () => {
+    expect(update(o, {
+      $pull: { c: { 
+        $and: [
+          { $in: [1, 2, 3, 4, 5] }, 
+          { $eq: 5 }
+        ] 
+      } },
+    }).c).toEqual([1, 15])
+  })
+
+  it("Works with $or", () => {
+    expect(update(o, { $pull: { c: { $or: [{ $in: [1, 2, 3, 4, 5] }, { $eq: 5 }] } } }).c).toEqual([15])
+  })
+
+  it("Works with $not", () => {
+    expect(
+      update(o, {
+        $pull: { a: { $not: { $in: [1, 2] } } }
+      }).a
+    ).toEqual([1, 2])
+
+    expect(
+      update(o, {
+        $pull: { a: { $not: {
+          $and: [
+            {$lt: 3},
+            {$gt: 1}
+          ]
+        } } }
+      }).a
+    ).toEqual([2])
+  })
+
   it("Doesn't mutate the target", () => {
     update(o, { $pull: { a: { $lte: 2 } } })
-    expect(o).toEqual({ a: [1, 2, 3], b: ["a", "b"] })
+    expect(o).toEqual({ a: [1, 2, 3], b: ["a", "b"], c: [1, 5, 15] })
   })
 })
 

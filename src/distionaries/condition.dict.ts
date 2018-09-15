@@ -1,5 +1,5 @@
-import { throwError, exception, ObjectLit } from "..";
-import { isArray } from "../checkers";
+import { throwError, exception, ObjectLit } from "../index";
+import { isArray } from "../checkers"
 
 export interface Conditionable {
   [key: string]: ConditionQuery | string | symbol | number
@@ -15,6 +15,12 @@ export interface ConditionQuery {
   $lte?: any
   $in?:  any[]
   $nin?: any[]
+
+  $and?: ConditionQuery[]
+  $or?: ConditionQuery[]
+  $not?: ConditionQuery
+
+  $type?: "number" | "symbol" | "function" | "object" | "array" | "boolean" | "string" | "undefined"
 }
 
 export const conditionDictionary = {
@@ -45,4 +51,48 @@ export const conditionDictionary = {
     return !conditions.some(con => item === con)
   },
 
+  $and: <T>(conditionQ: ConditionQuery[]) => (item: T): boolean => 
+    conditionQ.every(condition => {
+      for(const key in condition) {
+        if(key in conditionDictionary) {
+          // @ts-ignore
+          if(!conditionDictionary[key](condition[key])(item)) return false
+        } else {
+          return item === condition[key]
+        }
+      }
+      return true
+    }),
+
+  $or: <T>(conditionQ: ConditionQuery[]) => (item: T): boolean => 
+    conditionQ.some(condition => {
+      for(const key in condition) {
+        if(key in conditionDictionary) {
+          // @ts-ignore
+          if(!conditionDictionary[key](condition[key])(item)) return false
+        } else {
+          return item === condition[key]
+        }
+      }
+      return true
+    }),
+
+  $not: <T>(condition: ConditionQuery) => (item: T): boolean => {
+    for(const key in condition) {
+      if(key in conditionDictionary) {
+        // @ts-ignore
+        return !conditionDictionary[key](condition[key])(item)
+      } else {
+        return !(item === condition[key])
+      }
+    }
+
+    return true
+  },
+
+  $type: <T>(type: string) => (item: T): boolean => 
+    type === "array"
+      ? isArray(item)
+      : typeof item === type
+  
 }

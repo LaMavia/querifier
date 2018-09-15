@@ -1,4 +1,4 @@
-import { throwError } from "..";
+import { throwError } from "../index";
 
 export interface Arrayable {
   [key: string]: ArrayQuery | string | symbol | number
