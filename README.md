@@ -179,3 +179,63 @@ Example
 > Matches values that are members of a specified value
 ### $nin
 > Matches values that aren't members of a specified value
+### $and
+> Joins query elements with the logical `and` operator. Accepts and array of conditionals
+```typescript
+const object = { array: [1, 2, 3, 4] }
+
+update(object, {$pull:{array: { $and: [
+  { $gt: 2 },
+  { $lt: 5 },
+  { $in: [3, 4, 5] }
+] }}})
+// -> { array: [1, 2, 5] }
+```
+### $or
+> Joins query elements with the logical `or` operator. Accepts and array of conditionals
+```typescript
+const object = { array: [1, 2, 3, 4] }
+
+update(object, {$pull:{array: { $or: [
+  { $eq: 2 },
+  { $eq: 4 }
+] }}})
+// -> { array: [1, 3] }
+```
+### $not 
+> Performs the logical `not` operation with the value
+```typescript
+const object = { array: [1, 2, 3] }
+
+update(object, {
+  $pull: {
+    array: {
+      $not: {
+        $eq: 3
+      }
+    }
+  }
+}) // -> { array: [3] }
+
+update(object, {
+  $pull: {
+    array: {
+      $not: 2
+    }
+  }
+}) // -> { array: [2] }
+``` 
+
+### $type
+> Returns true if type matches
+```typescript
+const object = {array: [1, 2, "Dog"]}
+
+update(object, {
+  $pull: {
+    array: {
+      $type: "string"
+    }
+  }
+}) // -> { array: [1, 2] }
+``` 

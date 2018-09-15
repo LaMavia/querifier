@@ -1,8 +1,10 @@
 import { throwError, exception, ObjectLit } from "../index";
 import { isArray } from "../checkers"
 
+export type ConditionableValue = ConditionQuery | string | symbol | number
+
 export interface Conditionable {
-  [key: string]: ConditionQuery | string | symbol | number
+  [key: string]: ConditionableValue
 }
 
 export interface ConditionQuery {
@@ -18,7 +20,7 @@ export interface ConditionQuery {
 
   $and?: ConditionQuery[]
   $or?: ConditionQuery[]
-  $not?: ConditionQuery
+  $not?: ConditionQuery | string | symbol | number
 
   $type?: "number" | "symbol" | "function" | "object" | "array" | "boolean" | "string" | "undefined"
 }
@@ -77,14 +79,19 @@ export const conditionDictionary = {
       return true
     }),
 
-  $not: <T>(condition: ConditionQuery) => (item: T): boolean => {
-    for(const key in condition) {
-      if(key in conditionDictionary) {
-        // @ts-ignore
-        return !conditionDictionary[key](condition[key])(item)
-      } else {
-        return !(item === condition[key])
+  $not: <T>(condition: ConditionQuery | ConditionableValue) => (item: T): boolean => {
+    if(typeof condition === "object") {
+      for(const key in condition) {
+        if(key in conditionDictionary) {
+          // @ts-ignore
+          return !conditionDictionary[key](condition[key])(item)
+        } else {
+          return !(item === condition[key])
+        }
       }
+    } else {
+      // @ts-ignore
+      return !(condition === item)
     }
 
     return true

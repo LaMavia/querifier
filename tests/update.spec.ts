@@ -286,6 +286,35 @@ describe("$pull", () => {
         } } }
       }).a
     ).toEqual([2])
+
+    expect(
+      update(o, {
+        $pull: {
+          a: {
+            $not: 2
+          }
+        }
+      }).a
+    ).toEqual([2])
+  })
+
+  it("Works with $type", () => {
+    expect(
+      update(o, {
+        $pull: {a: {
+          $type: "number"
+        }}
+      }).a
+    ).toEqual([])
+
+    expect(
+      update(o, {
+        $pull: {a: {$and: [
+          { $type: "number" },
+          { $gte: 2 }
+        ]}}
+      }).a
+    ).toEqual([1])
   })
 
   it("Doesn't mutate the target", () => {
