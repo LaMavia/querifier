@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es6",
-		"module": "amd",
+		"module": "commonjs",
 		"strict": true,
 		"noImplicitAny": true,
 		"noImplicitThis": true,
@@ -10,10 +10,12 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"declaration": true,
-		"outFile": "./dist/index.js",
-		"baseUrl": "./src/"
+		"outDir": "./dist/",
 	},
 	"files": [
 		"./src/index.ts"
+	],
+	"include": [
+		"./src/**/*"
 	]
 }

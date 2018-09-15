@@ -1,4 +1,4 @@
-# Querify
+# Querifier
 Mongo-like query execution on javascript objects
 
 ## Currently available 

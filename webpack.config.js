@@ -10,8 +10,9 @@ function fromRoot(...paths) {
 module.exports = {
 	mode: "development",
 	entry: "./src/index.ts",
+	target: "node",
 	output: {
-		path: path.resolve(__dirname),
+		path: fromRoot("dist/"),
 		filename: "index.js"
 	},
 	resolve: {
@@ -34,6 +35,6 @@ module.exports = {
 	// },
   plugins: [
 		new CheckerPlugin(),
-		new TsconfigPathsPlugin({configFile: "./tsconfig.json"})
+		// new TsconfigPathsPlugin({configFile: "./tsconfig.json"})
   ]
 }
