@@ -215,7 +215,8 @@ describe("$unset", () => {
 })
 
 describe("$pull", () => {
-  const o = { a: [1, 2, 3], b: ["a", "b"], c: [1, 5, 15] }
+  const o = { a: [1, 2, 3], b: ["a", "b"], c: [1, 5, 15], d: ["James the dog", "Carl the dog", "Joe the cat"] }
+  const c = Object.assign({}, o)
 
   it("Pulls out single item", () => {
     expect(update(o, { $pull: { a: 2 } }).a).toEqual([1, 3])
@@ -224,6 +225,15 @@ describe("$pull", () => {
 
   it("Works with $in", () => {
     expect(update(o, { $pull: { a: { $in: [2, 3] } } }).a).toEqual([1])
+    expect(
+      update(o, {
+        $pull: {
+          d: {
+            $in: [/dog/]
+          }
+        }
+      }).d
+    ).toEqual(["Joe the cat"])
   })
 
   it("Works with $nin", () => {
@@ -319,7 +329,7 @@ describe("$pull", () => {
 
   it("Doesn't mutate the target", () => {
     update(o, { $pull: { a: { $lte: 2 } } })
-    expect(o).toEqual({ a: [1, 2, 3], b: ["a", "b"], c: [1, 5, 15] })
+    expect(o).toEqual(c)
   })
 })
 

@@ -43,25 +43,30 @@ export const conditionDictionary = {
       exception(`[$in]> "${JSON.stringify(conditions)} is not an array"`)
       return true
     }
-    return conditions.some(con => item === con)
+    return conditions.some(con => 
+      con instanceof RegExp 
+        ? con.test(typeof item === "string" ? item : String(item))
+        : item === con
+    )
   },
   $nin: <T>(conditions: T[] = throwError()) => (item: T) => {
     if(!isArray(conditions)) {
       exception(`[$in]> "${JSON.stringify(conditions)} is not an array"`)
       return true
     }
-    return !conditions.some(con => item === con)
+    return !conditions.some(con => 
+      con instanceof RegExp 
+        ? con.test(typeof item === "string" ? item : String(item))
+        : item === con
+    )
   },
 
   $and: <T>(conditionQ: ConditionQuery[]) => (item: T): boolean => 
     conditionQ.every(condition => {
-      for(const key in condition) {
-        if(key in conditionDictionary) {
-          // @ts-ignore
-          if(!conditionDictionary[key](condition[key])(item)) return false
-        } else {
-          return item === condition[key]
-        }
+      for (const key in condition) {
+        // @ts-ignore
+        if (key in conditionDictionary && !conditionDictionary[key](condition[key])(item)) return false
+        if(!item === condition[key]) return false
       }
       return true
     }),
@@ -69,32 +74,32 @@ export const conditionDictionary = {
   $or: <T>(conditionQ: ConditionQuery[]) => (item: T): boolean => 
     conditionQ.some(condition => {
       for(const key in condition) {
-        if(key in conditionDictionary) {
-          // @ts-ignore
-          if(!conditionDictionary[key](condition[key])(item)) return false
-        } else {
-          return item === condition[key]
+        // @ts-ignore
+        if(key in conditionDictionary && !conditionDictionary[key](condition[key])(item)) {
+          return false
+        } else if (!item === condition[key]){
+          return false
         }
       }
       return true
     }),
 
   $not: <T>(condition: ConditionQuery | ConditionableValue) => (item: T): boolean => {
-    if(typeof condition === "object") {
-      for(const key in condition) {
-        if(key in conditionDictionary) {
+    if (typeof condition === "object") {
+      for (const key in condition) {
+        if (key in conditionDictionary && 
           // @ts-ignore
-          return !conditionDictionary[key](condition[key])(item)
-        } else {
-          return !(item === condition[key])
+          !conditionDictionary[key](condition[key])(item)
+        ) {
+          return true
         }
+        else if (item !== condition[key]) return false
       }
-    } else {
-      // @ts-ignore
-      return !(condition === item)
+      return false
     }
+    // @ts-ignore
+    return !(condition === item)
 
-    return true
   },
 
   $type: <T>(type: string) => (item: T): boolean => 
