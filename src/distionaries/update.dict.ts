@@ -24,7 +24,7 @@ export const dictionary = {
 	) => {
     for (const prop in obj) {
       if(typeof target[prop] !== typeof obj[prop]) {
-        exception(`[$set]> typeof target[${prop}] doesn't match typeof query[${prop}]`)
+        exception(`[$set]> typeof ${JSON.stringify(target[prop])} doesn't match typeof ${JSON.stringify(obj[prop])}`)
         continue
       }
 
@@ -33,7 +33,7 @@ export const dictionary = {
         target[prop] = obj[prop]
       }
       catch(e) {
-        exception(`[$set]> Error setting value of target[${prop}]: "${e}"`)
+        exception(`[$set]> Error setting value of ${JSON.stringify(target[prop])}: "${e}"`)
       }
     }
 
@@ -45,11 +45,11 @@ export const dictionary = {
 	) => {
     for(const prop in obj) {
       if(typeof obj[prop] !== "number" || obj[prop] === NaN) {
-        exception(`[$inc]> query[${prop}] is not a number`)
+        exception(`[$inc]> ${JSON.stringify(obj[prop])} is not a number`)
         continue
       }
       if(typeof target[prop] !== "number" || target[prop] === NaN) {
-        exception(`[$inc]> target[${prop}] is not a number`)
+        exception(`[$inc]> ${JSON.stringify(target[prop])} is not a number`)
         continue
       }
 
@@ -57,7 +57,7 @@ export const dictionary = {
         target[prop] = (target[prop] || 0) + (obj[prop] || 0)
       } 
       catch (e) {
-        exception(`[$inc]> Error incrementing target[${prop}]`)
+        exception(`[$inc]> Error incrementing ${JSON.stringify(target[prop])}`)
       }
     }
     
@@ -74,7 +74,7 @@ export const dictionary = {
           : target[prop]
       } 
       catch (e) {
-        exception(`[$min]> Error setting target[${prop}]`)
+        exception(`[$min]> Error setting ${target[prop]}`)
       }
     }
     
@@ -91,7 +91,7 @@ export const dictionary = {
           : target[prop]
       } 
       catch (e) {
-        exception(`[$max]> Error setting target[${prop}]`)
+        exception(`[$max]> Error setting ${target[prop]}`)
       }
     }
     
@@ -103,11 +103,11 @@ export const dictionary = {
 	) => {
     for(const prop in obj) {
       if(typeof obj[prop] !== "number" || obj[prop] === NaN) {
-        exception(`[$mul]> query[${prop}] is not a number`)
+        exception(`[$mul]> ${JSON.stringify(obj[prop])} is not a number`)
         continue
       }
       if(typeof target[prop] !== "number" || target[prop] === NaN) {
-        exception(`[$mul]> target[${prop}] is not a number`)
+        exception(`[$mul]> ${JSON.stringify(target[prop])} is not a number`)
         continue
       }
 

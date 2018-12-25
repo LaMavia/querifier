@@ -8,7 +8,7 @@ exports.dictionary = {
     $set: (target) => (obj = index_1.throwError()) => {
         for (const prop in obj) {
             if (typeof target[prop] !== typeof obj[prop]) {
-                index_1.exception(`[$set]> typeof target[${prop}] doesn't match typeof query[${prop}]`);
+                index_1.exception(`[$set]> typeof ${JSON.stringify(target[prop])} doesn't match typeof ${JSON.stringify(obj[prop])}`);
                 continue;
             }
             // Watchout for readonly props
@@ -16,7 +16,7 @@ exports.dictionary = {
                 target[prop] = obj[prop];
             }
             catch (e) {
-                index_1.exception(`[$set]> Error setting value of target[${prop}]: "${e}"`);
+                index_1.exception(`[$set]> Error setting value of ${JSON.stringify(target[prop])}: "${e}"`);
             }
         }
         return target;
@@ -24,18 +24,18 @@ exports.dictionary = {
     $inc: (target) => (obj = index_1.throwError()) => {
         for (const prop in obj) {
             if (typeof obj[prop] !== "number" || obj[prop] === NaN) {
-                index_1.exception(`[$inc]> query[${prop}] is not a number`);
+                index_1.exception(`[$inc]> ${JSON.stringify(obj[prop])} is not a number`);
                 continue;
             }
             if (typeof target[prop] !== "number" || target[prop] === NaN) {
-                index_1.exception(`[$inc]> target[${prop}] is not a number`);
+                index_1.exception(`[$inc]> ${JSON.stringify(target[prop])} is not a number`);
                 continue;
             }
             try {
                 target[prop] = (target[prop] || 0) + (obj[prop] || 0);
             }
             catch (e) {
-                index_1.exception(`[$inc]> Error incrementing target[${prop}]`);
+                index_1.exception(`[$inc]> Error incrementing ${JSON.stringify(target[prop])}`);
             }
         }
         return target;
@@ -48,7 +48,7 @@ exports.dictionary = {
                     : target[prop];
             }
             catch (e) {
-                index_1.exception(`[$min]> Error setting target[${prop}]`);
+                index_1.exception(`[$min]> Error setting ${target[prop]}`);
             }
         }
         return target;
@@ -61,7 +61,7 @@ exports.dictionary = {
                     : target[prop];
             }
             catch (e) {
-                index_1.exception(`[$max]> Error setting target[${prop}]`);
+                index_1.exception(`[$max]> Error setting ${target[prop]}`);
             }
         }
         return target;
@@ -69,11 +69,11 @@ exports.dictionary = {
     $mul: (target) => (obj = index_1.throwError()) => {
         for (const prop in obj) {
             if (typeof obj[prop] !== "number" || obj[prop] === NaN) {
-                index_1.exception(`[$mul]> query[${prop}] is not a number`);
+                index_1.exception(`[$mul]> ${JSON.stringify(obj[prop])} is not a number`);
                 continue;
             }
             if (typeof target[prop] !== "number" || target[prop] === NaN) {
-                index_1.exception(`[$mul]> target[${prop}] is not a number`);
+                index_1.exception(`[$mul]> ${JSON.stringify(target[prop])} is not a number`);
                 continue;
             }
             try {

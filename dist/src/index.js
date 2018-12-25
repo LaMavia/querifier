@@ -1,19 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const update_dict_1 = require("./distionaries/update.dict");
+const condition_dict_1 = require("./distionaries/condition.dict");
+const checkers_1 = require("./checkers");
+const arayify_1 = require("./helpers/arayify");
+const copy_1 = require("./helpers/copy");
 exports.exception = console.exception || console.error;
 exports.throwError = () => {
-    throw new Error('Missing parameter');
+    throw new Error("[Querifier] Missing parameter");
 };
+/**
+ * Not-mutating update function. Returns updated object
+ * @param object
+ * @param query
+ */
 exports.update = (object, query) => {
-    const target = JSON.parse(JSON.stringify(object));
+    const target = copy_1.copyObj(object);
     for (const prop in query) {
         if (prop in update_dict_1.dictionary) {
-            const args = [];
-            args.push(query[prop]);
-            delete query[prop];
             // @ts-ignore
-            update_dict_1.dictionary[prop](target)(...args);
+            update_dict_1.dictionary[prop](target)(query[prop]);
+            delete query[prop];
         }
         else {
             target[prop] = query[prop];
@@ -21,6 +28,29 @@ exports.update = (object, query) => {
     }
     return target;
 };
+exports.get = (object, query, settings = {}) => {
+    const target = copy_1.copyObj(object);
+    let output = [];
+    for (const prop in query) {
+        for (const q in query[prop]) {
+            if (q in condition_dict_1.conditionDictionary && prop in target) {
+                const f = condition_dict_1.conditionDictionary[q](query[prop][q]);
+                output = output.concat((checkers_1.isArray(target[prop])
+                    ? target[prop]
+                    : arayify_1.arrayify(target[prop], settings.$mapper || (x => x))).filter(f || (() => true)));
+                delete query[prop][q];
+            }
+        }
+        delete query[prop];
+    }
+    for (const key in settings) {
+        if (key in condition_dict_1.conditionSettings && key !== '$mapper') {
+            output = condition_dict_1.conditionSettings[key](target, output)(settings[key]);
+        }
+    }
+    return output;
+};
 exports.default = {
-    update: exports.update
+    update: exports.update,
+    get: exports.get,
 };

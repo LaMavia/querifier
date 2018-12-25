@@ -7,6 +7,36 @@ export interface Conditionable {
   [key: string]: ConditionableValue
 }
 
+export interface ConditionSettings {
+  [key: string]: any
+  $inject?: ObjectLit
+  $sort?: "asc" | "dsc"
+  $mapper?: (x: any) => any
+}
+
+export const conditionSettings: {[key: string]: <T>(target: T & ObjectLit, output: T[]) => (item: any) => T[]} = {
+  $inject: <T>(target: T & ObjectLit, output: T[]) => (items: {[key: string]: boolean}) => {
+    for(const key in items) {
+      if(items[key]) {
+        output = output.concat(
+          isArray(target[key]) 
+            ? target[key] 
+            : [target[key]]
+        )
+      }
+    }
+    return output
+  },
+  $sort: <T>(target: T & ObjectLit, output: T[]) => (order: string) => 
+    // @ts-ignore
+    order === "asc" ? output.sort((a,b) => a-b) : output.slice().reverse(),
+  $mapper: <T>(target: T & ObjectLit, output: T[]) => (callback: (item: T) => T) => output.map(callback)
+}
+
+export interface HighConditionQuery {
+  [prop: string]: ConditionQuery
+}
+
 export interface ConditionQuery {
   [key: string]: any
   $eq?:  any
@@ -23,9 +53,12 @@ export interface ConditionQuery {
   $not?: ConditionQuery | string | symbol | number
 
   $type?: "number" | "symbol" | "function" | "object" | "array" | "boolean" | "string" | "undefined"
+
+  $match?: RegExp
+  $exec?: (item: unknown) => boolean
 }
 
-export const conditionDictionary = {
+export const conditionDictionary: {[key: string]: <T>(condition: any) => (item: T) => boolean} = {
   $eq: <T>(condition: T = throwError()) => (item: T) => 
     item === condition,
   $ne: <T>(condition: T = throwError()) => (item: T) => 
@@ -105,6 +138,11 @@ export const conditionDictionary = {
   $type: <T>(type: string) => (item: T): boolean => 
     type === "array"
       ? isArray(item)
-      : typeof item === type
+      : typeof item === type,
   
+  $match: <T>(regexp: RegExp) => (item: T): boolean => 
+    // @ts-ignore  
+    regexp.test(item),
+  
+  $exec: (f: (<T>(item: T) => boolean)) => f
 }
