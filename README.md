@@ -3,7 +3,9 @@ Mongo-like query execution on javascript objects
 
 ## Currently available 
 1. [Update](#update)
-2. [Operators](#operators)
+2. [Get](#get)
+3. [Operators](#operators)
+4. [Conditionals](#conditionals)
 
 # Features
 ## <div id="update">Update</div>
@@ -19,6 +21,27 @@ Performes a not mutating action on an object
   
 ```
 Bisides accepting a classical ```key: value``` pairs, it accepts special operators, just like MongoDB queries.
+## <div id="get">Get</div>
+Performes a search operation on specified collections of an object. Accepts an object, `ConditionQuery` and `options`
+>Example
+```typescript
+  const object = {
+    evens: [0, 2, 4, 6, 8],
+    odds: [1, 3, 5, 7, 9]
+  }
+
+  get(object, {
+    evens: {
+      $lt: 6
+    },
+    odds: {
+      $lt: 7
+    }
+  }, {
+    $sort: "asc"
+  })
+  // -> [1, 2, 3, 4, 5]
+```  
 ### <div id="operators">Operators:</div>
 #### $set
 >Sets a new value of object's property **only** if their types match
@@ -162,6 +185,9 @@ Example
 
   update(object, { $pull: { array: { $in: [1, 2] } } }) 
   // -> { array: [3, 4] }
+
+  get(object, { array: { $gte: 3 } })
+  // -> [3, 4]
 ```
 ### $eq
 > Matches values that are equal to a specified value
@@ -238,4 +264,64 @@ update(object, {
     }
   }
 }) // -> { array: [1, 2] }
+``` 
+### $match
+> Returns a result of `Regexp.test`
+```typescript
+const object = {
+  files: [
+    "index.ts",
+    "get.ts",
+    "update.ts",
+    "lame.js"
+  ],
+  people: [
+    "Jon Snow",
+    "Ann Snow",
+    "Lil Snow",
+    "Lil Notsnow",
+  ]
+}
+
+update(object, {
+  $pull: {
+    files: {
+      $match: /\.ts$/
+    }
+  }
+}) // -> { people: [...], files: ["index.ts", "get.ts", "update.ts"] }
+
+get(object, {
+  people: {
+    $match: /\w*\sSnow/
+  }
+}) // -> ["Jon Snow", "Ann Snow", "Lil Snow"]
+``` 
+### $exec
+> Returns a result of the given function of type: ``` <T>(item: T) => boolean```
+```typescript
+const object = {
+  people: [
+    {
+      name: "Jon Snow",
+      age: 21
+    },
+    {
+      name: "Ann Snow",
+      age: 20
+    },
+    {
+      name: "Lil Snow",
+      age: 8
+    }
+  ]
+}
+
+get(object, {
+  people: {
+    $exec(person) {
+      return person.age >= 18
+    }
+  }
+}) // -> [{name: "Jon Snow", age: 21}, {name: "Ann Snow", age: 20}]
 ``` 
