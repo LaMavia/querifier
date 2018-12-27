@@ -1,11 +1,12 @@
 {
   "name": "querifier",
-  "version": "0.4.1",
+  "version": "0.4.5",
   "description": "Mongo query implementation for objects",
   "main": "./dist/src/index.js",
   "scripts": {
     "test": "jest",
     "prepublish": "npm run test && npm run build",
+    "postpublish": "git add -A && git commit -m \"After publish\" && git push ",
     "build": "tsc -p ./tsconfig.build.json"
   },
   "repository": {

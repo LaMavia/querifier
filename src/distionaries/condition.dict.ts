@@ -1,7 +1,7 @@
 import { throwError, exception, ObjectLit } from "../index";
 import { isArray } from "../checkers"
 
-export type ConditionableValue = ConditionQuery | string | symbol | number
+export type ConditionableValue = ConditionQuery | string | symbol | number 
 
 export interface Conditionable {
   [key: string]: ConditionableValue

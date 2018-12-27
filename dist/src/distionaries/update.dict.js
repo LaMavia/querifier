@@ -205,5 +205,19 @@ exports.dictionary = {
             }
         }
         return target;
-    }
+    },
+    $each: (target) => (query) => {
+        debugger;
+        for (const arrn in query) {
+            if (target[arrn] && checkers_1.isArray(target[arrn])) {
+                for (const i in target[arrn]) {
+                    const obj = target[arrn][i];
+                    if (checkers_1.isObject(obj)) {
+                        target[arrn][i] = index_1.update(obj, query[arrn]);
+                    }
+                }
+            }
+        }
+        return target;
+    },
 };

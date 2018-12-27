@@ -5,7 +5,10 @@ const condition_dict_1 = require("./distionaries/condition.dict");
 const checkers_1 = require("./checkers");
 const arayify_1 = require("./helpers/arayify");
 const copy_1 = require("./helpers/copy");
+const nativfy_1 = require("./helpers/nativfy");
 exports.exception = console.exception || console.error;
+exports.natifyCondition = nativfy_1.natifyCondition;
+exports.natifyUpdate = nativfy_1.natifyUpdate;
 exports.throwError = () => {
     throw new Error("[Querifier] Missing parameter");
 };
@@ -20,7 +23,7 @@ exports.update = (object, query) => {
         if (prop in update_dict_1.dictionary) {
             // @ts-ignore
             update_dict_1.dictionary[prop](target)(query[prop]);
-            delete query[prop];
+            // delete query[prop]
         }
         else {
             target[prop] = query[prop];
@@ -53,4 +56,6 @@ exports.get = (object, query, settings = {}) => {
 exports.default = {
     update: exports.update,
     get: exports.get,
+    natifyUpdate: exports.natifyUpdate,
+    natifyCondition: exports.natifyCondition
 };

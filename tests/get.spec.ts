@@ -1,4 +1,4 @@
-import { get } from "../src"
+import { get, update } from "../src"
 interface User {
 	name: string
 	age: number

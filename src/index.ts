@@ -9,6 +9,7 @@ import {
 import { isArray } from "./checkers"
 import { arrayify } from "./helpers/arayify"
 import { copyObj } from "./helpers/copy";
+import { natifyCondition as _nc, natifyUpdate as _nu } from "./helpers/nativfy"
 
 export interface ObjectLit {
 	[key: string]: any | any[]
@@ -19,6 +20,9 @@ export type HighConditionQuery = _HCQ
 export type ConditionSettings = _CS
 
 export const exception = console.exception || console.error
+
+export const natifyCondition = _nc
+export const natifyUpdate = _nu
 
 export const throwError = () => {
 	throw new Error("[Querifier] Missing parameter")
@@ -38,7 +42,7 @@ export const update = <T extends ObjectLit>(
 		if (prop in dictionary) {
 			// @ts-ignore
 			dictionary[prop](target)(query[prop])
-			delete query[prop]
+			// delete query[prop]
 		} else {
 			target[prop] = query[prop]
 		}
@@ -81,4 +85,6 @@ export const get = <T extends ObjectLit>(
 export default {
 	update,
 	get,
+	natifyUpdate,
+	natifyCondition
 }

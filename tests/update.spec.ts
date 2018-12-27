@@ -217,6 +217,7 @@ describe("$unset", () => {
 describe("$pull", () => {
   const o = { a: [1, 2, 3], b: ["a", "b"], c: [1, 5, 15], d: ["James the dog", "Carl the dog", "Joe the cat"] }
   const c = Object.assign({}, o)
+  const a = [1, 2, 3, 4]
 
   it("Pulls out single item", () => {
     expect(update(o, { $pull: { a: 2 } }).a).toEqual([1, 3])
@@ -371,6 +372,84 @@ describe("$push", () => {
   })
 })
 
+describe("$each", () => {
+  const o = {
+    array: [
+      {
+        name: "Jon Snow",
+        age: 21
+      },
+      {
+        name: "Ann Snow",
+        age: 19
+      },
+      {
+        name: "Lill Snow",
+        age: 7
+      },
+    ]
+  }
 
+  it("Doesn't mutate the target", () => {
+    update(o, {
+      $each: {
+        array: {
+          $pull: {
+            $gte: 18 
+          }
+        }
+      }
+    })
+    expect(o.array).toEqual([
+      {
+        name: "Jon Snow",
+        age: 21
+      },
+      {
+        name: "Ann Snow",
+        age: 19
+      },
+      {
+        name: "Lill Snow",
+        age: 7
+      },
+    ])
+  })
 
+  it("Works with $set", () => {
+    expect(update(o, {
+      $each: {
+        array: {
+          $set: {
+            age: 18
+          }
+        }
+      }
+    }).array).toEqual([
+      {
+        name: "Jon Snow",
+        age: 18
+      },
+      {
+        name: "Ann Snow",
+        age: 18
+      },
+      {
+        name: "Lill Snow",
+        age: 18
+      }
+    ])
+  })
+})
 
+describe("$this", () => {
+	const o = [1, 2, 3]
+	it("Doesn't mutate the target", () => {
+		update(o, {
+			$pull: {
+        $this: 2
+      }
+    })
+    expect(o).toEqual([1,2,3])
+  })
+})

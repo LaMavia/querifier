@@ -1,5 +1,5 @@
 import { ObjectLit } from "../index";
-import { ConditionQuery, Conditionable } from "./condition.dict";
+import { ConditionQuery } from "./condition.dict";
 import { ArrayQuery, Arrayable } from "./array.dict";
 export interface UpdateQuery {
     [key: string]: any;
@@ -11,11 +11,14 @@ export interface UpdateQuery {
     $rename?: ObjectLit;
     $unset?: ObjectLit;
     $addToSet?: ObjectLit;
-    $pull?: Conditionable;
+    $pull?: ConditionQuery;
     $pop?: {
         [key: string]: number;
     };
     $push?: Arrayable;
+    $each?: {
+        [arrayName: string]: UpdateQuery;
+    };
 }
 export declare const dictionary: {
     $set: <T extends ObjectLit>(target: T) => (obj?: ObjectLit) => T;
@@ -29,4 +32,7 @@ export declare const dictionary: {
     $pull: <T extends ObjectLit>(target: T) => (query?: ObjectLit & ConditionQuery) => T;
     $pop: <T extends ObjectLit>(target: T) => (query?: ObjectLit & ConditionQuery) => T;
     $push: <T extends ObjectLit>(target: T) => (query?: ObjectLit & ArrayQuery) => T;
+    $each: <T extends ObjectLit>(target: T) => (query: {
+        [arrayName: string]: UpdateQuery;
+    }) => T;
 };

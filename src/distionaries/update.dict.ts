@@ -1,7 +1,8 @@
-import { ObjectLit, exception, throwError } from "../index";
-import { isArray } from "../checkers";
+import { ObjectLit, exception, throwError, update } from "../index";
+import { isArray, isObject } from "../checkers";
 import { conditionDictionary, ConditionQuery, Conditionable } from "./condition.dict";
 import { ArrayQuery, arrayDictionary, Arrayable } from "./array.dict";
+import { copyObj } from "../helpers/copy";
 
 export interface UpdateQuery {
   [key: string]: any
@@ -13,9 +14,10 @@ export interface UpdateQuery {
   $rename?: ObjectLit
   $unset?: ObjectLit 
   $addToSet?: ObjectLit
-  $pull?: Conditionable
+  $pull?: ConditionQuery
   $pop?: {[key: string]: number}
   $push?: Arrayable
+  $each?: {[arrayName: string]: UpdateQuery}
 }
 
 export const dictionary = {
@@ -259,5 +261,20 @@ export const dictionary = {
     }
 
     return target
-  }
+  },
+
+  $each: <T extends ObjectLit>(target: T) => (query: {[arrayName: string]: UpdateQuery}) => {
+    debugger
+    for(const arrn in query) {
+      if (target[arrn] && isArray(target[arrn])) {
+        for(const i in target[arrn] as ObjectLit[]) {
+          const obj = target[arrn][i]
+          if(isObject(obj)) {
+            target[arrn][i] = update(obj, query[arrn])
+          }
+        }
+      }
+    }
+    return target
+  },
 }
