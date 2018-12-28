@@ -3,15 +3,16 @@ export declare type ConditionableValue = ConditionQuery | string | symbol | numb
 export interface Conditionable {
     [key: string]: ConditionableValue;
 }
-export interface ConditionSettings {
+export interface ConditionSettings<MT> {
     [key: string]: any;
     $inject?: ObjectLit;
-    $sort?: "asc" | "dsc";
-    $mapper?: (x: any) => any;
+    $sort: "asc" | "dsc";
+    $mapper: (x: any) => MT;
 }
-export declare const conditionSettings: {
-    [key: string]: <T>(target: T & ObjectLit, output: T[]) => (item: any) => T[];
-};
+interface _ConditionSettings {
+    [key: string]: <T extends ObjectLit, K extends keyof T, R>(target: T, output: T[K][]) => (items: any) => T[K][];
+}
+export declare const conditionSettings: _ConditionSettings;
 export interface HighConditionQuery {
     [prop: string]: ConditionQuery;
 }
@@ -32,6 +33,8 @@ export interface ConditionQuery {
     $match?: RegExp;
     $exec?: (item: unknown) => boolean;
 }
-export declare const conditionDictionary: {
+interface ConDict {
     [key: string]: <T>(condition: any) => (item: T) => boolean;
-};
+}
+export declare const conditionDictionary: ConDict;
+export {};

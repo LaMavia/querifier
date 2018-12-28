@@ -1,18 +1,23 @@
 "use strict";
-/*const execQuery = <T extends ObjectLit>(object: T, query: UpdateQuery): T => {
-  const target = JSON.parse(JSON.stringify(object))
+Object.defineProperty(exports, "__esModule", { value: true });
+const update_dict_1 = require("./distionaries/update.dict");
+const copy_1 = require("./helpers/copy");
+/**
+ * Not-mutating update function. Returns updated object
+ * @param object
+ * @param query
+ */
+exports.update = (object, query) => {
+    const target = copy_1.copyObj(object);
     for (const prop in query) {
-    if (prop in dictionary) {
-            const args = []
-      args.push(query[prop])
-      delete query[prop]
+        if (prop in update_dict_1.dictionary) {
             // @ts-ignore
-            dictionary[prop](target)(...args)
-    } else {
-      target[prop] = query[prop]
+            update_dict_1.dictionary[prop](target)(query[prop]);
+            // delete query[prop]
+        }
+        else {
+            target[prop] = query[prop];
+        }
     }
-  }
-        
-
-    return target
-}*/ 
+    return target;
+};

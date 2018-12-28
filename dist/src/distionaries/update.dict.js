@@ -4,6 +4,7 @@ const index_1 = require("../index");
 const checkers_1 = require("../checkers");
 const condition_dict_1 = require("./condition.dict");
 const array_dict_1 = require("./array.dict");
+const update_1 = require("../update");
 exports.dictionary = {
     $set: (target) => (obj = index_1.throwError()) => {
         for (const prop in obj) {
@@ -213,7 +214,7 @@ exports.dictionary = {
                 for (const i in target[arrn]) {
                     const obj = target[arrn][i];
                     if (checkers_1.isObject(obj)) {
-                        target[arrn][i] = index_1.update(obj, query[arrn]);
+                        target[arrn][i] = update_1.update(obj, query[arrn]);
                     }
                 }
             }

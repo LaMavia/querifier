@@ -1,1 +1,1 @@
-export declare function arrayify<T>(obj: T, mapper?: <A, B>(x: A) => A | B): any[];
+export declare function arrayify<T, MT>(obj: T, mapper?: (x: any) => MT): any[];

@@ -1,4 +1,4 @@
-export function arrayify<T>(obj: T, mapper?: <A, B>(x: A) => A | B) {
+export function arrayify<T, MT>(obj: T, mapper?: (x: any) => MT) {
   const output: any[] = []
   // @ts-ignore
   // console.log(`Prototype: ${obj.prototype}\nObj: ${JSON.stringify(obj)}\nInstanceof Map: ${obj instanceof Map}\nInstanceof Set: ${obj instanceof Set}`)

@@ -1,8 +1,8 @@
-import { ObjectLit, exception, throwError, update } from "../index";
+import { ObjectLit, exception, throwError } from "../index";
 import { isArray, isObject } from "../checkers";
 import { conditionDictionary, ConditionQuery, Conditionable } from "./condition.dict";
 import { ArrayQuery, arrayDictionary, Arrayable } from "./array.dict";
-import { copyObj } from "../helpers/copy";
+import { update } from "../update"
 
 export interface UpdateQuery {
   [key: string]: any

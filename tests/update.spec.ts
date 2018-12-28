@@ -1,4 +1,4 @@
-import { update } from "../src/"
+import { update } from "../src/update";
 
 describe('$addToSet', () => {
   it("Adds 1 to an array", () => {
@@ -439,17 +439,5 @@ describe("$each", () => {
         age: 18
       }
     ])
-  })
-})
-
-describe("$this", () => {
-	const o = [1, 2, 3]
-	it("Doesn't mutate the target", () => {
-		update(o, {
-			$pull: {
-        $this: 2
-      }
-    })
-    expect(o).toEqual([1,2,3])
   })
 })

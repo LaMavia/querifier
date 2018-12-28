@@ -6,18 +6,23 @@ export type ConditionableValue = ConditionQuery | string | symbol | number
 export interface Conditionable {
   [key: string]: ConditionableValue
 }
-
-export interface ConditionSettings {
+type MapItem<T> =
+  T extends Map<string, any> ? [string, any] : T
+export interface ConditionSettings<MT> {
   [key: string]: any
   $inject?: ObjectLit
-  $sort?: "asc" | "dsc"
-  $mapper?: (x: any) => any
+  $sort: "asc" | "dsc"
+  $mapper: (x: any) => MT
 }
 
-export const conditionSettings: {[key: string]: <T>(target: T & ObjectLit, output: T[]) => (item: any) => T[]} = {
-  $inject: <T>(target: T & ObjectLit, output: T[]) => (items: {[key: string]: boolean}) => {
+interface _ConditionSettings { 
+  [key: string]: <T extends ObjectLit, K extends keyof T, R>(target: T, output: T[K][]) => (items: any) => T[K][]
+}
+
+export const conditionSettings: _ConditionSettings = {
+  $inject: <T extends ObjectLit, K extends keyof T>(target: T, output: T[K][]) => (items: {[key: string]: boolean}) => {
     for(const key in items) {
-      if(items[key]) {
+      if(items[key]) { 
         output = output.concat(
           isArray(target[key]) 
             ? target[key] 
@@ -27,10 +32,10 @@ export const conditionSettings: {[key: string]: <T>(target: T & ObjectLit, outpu
     }
     return output
   },
-  $sort: <T>(target: T & ObjectLit, output: T[]) => (order: string) => 
+  $sort: <T, K extends keyof T>(target: T & ObjectLit, output: T[K][]) => (order: string) => 
     // @ts-ignore
     order === "asc" ? output.sort((a,b) => a-b) : output.slice().reverse(),
-  $mapper: <T>(target: T & ObjectLit, output: T[]) => (callback: (item: T) => T) => output.map(callback)
+  $mapper: <T, K extends keyof T>(target: T & ObjectLit, output: T[K][]) => (callback: (value: T[K], index: number, array: T[K][]) => T[K]) => output.map(callback)
 }
 
 export interface HighConditionQuery {
@@ -58,7 +63,13 @@ export interface ConditionQuery {
   $exec?: (item: unknown) => boolean
 }
 
-export const conditionDictionary: {[key: string]: <T>(condition: any) => (item: T) => boolean} = {
+interface ConDict { 
+  [key: string]: <T>(condition: any) 
+    => (item: T) 
+    => boolean
+}
+
+export const conditionDictionary: ConDict = {
   $eq: <T>(condition: T = throwError()) => (item: T) => 
     item === condition,
   $ne: <T>(condition: T = throwError()) => (item: T) => 

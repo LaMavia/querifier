@@ -1,4 +1,4 @@
-import { get, update } from "../src"
+import { get } from "../src/get"
 interface User {
 	name: string
 	age: number
@@ -99,6 +99,9 @@ describe("$sort", () => {
 				},
 				{
 					$sort: "asc",
+					$mapper(x: number) {
+						return x	
+					}
 				}
 			)
 		).toEqual(a.primes)
@@ -194,8 +197,8 @@ describe("$exec", () => {
 					},
 				},
 				{
-					$mapper(x) {
-						return x
+					$mapper(v): User {
+						return v
 					},
 				}
 			)
@@ -211,7 +214,7 @@ describe("$exec", () => {
 		expect(
 			get(a, {
 				dogs: {
-					$exec([key, d]: any[]) {
+					$exec([key, d]: [string, Dog]) {
 						return d.breed === "York"
 					},
 				},
@@ -239,7 +242,7 @@ describe("$exec", () => {
 					},
 				},
 				{
-					$mapper: ([_id, obj]) => {
+					$mapper: ([_id, obj]: [string, Dog]): typeof obj & {_id: string} => {
 						return {
 							...obj,
 							_id,
@@ -275,12 +278,11 @@ describe("$exec", () => {
 		expect(get(a, {
 			cats: {
 				$exec(c: Cat) {
-					debugger
 					return c.name === "jelly"
 				}
 			}
 		}, {
-			$mapper(c: Cat) {
+			$mapper(c: Cat): Cat {
 				c.name = c.name.toLowerCase()
 				return c
 			}

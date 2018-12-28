@@ -1,4 +1,4 @@
-import { UpdateQuery } from "..";
+import { UpdateQuery } from "../distionaries/update.dict";
 import { ConditionQuery } from "../distionaries/condition.dict";
 
 export function natifyUpdate(query: UpdateQuery): UpdateQuery {
