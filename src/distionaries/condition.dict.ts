@@ -34,7 +34,7 @@ export const conditionSettings: _ConditionSettings = {
   },
   $sort: <T, K extends keyof T>(target: T & ObjectLit, output: T[K][]) => (order: string) => 
     // @ts-ignore
-    order === "asc" ? output.sort((a,b) => a-b) : output.slice().reverse(),
+    order === "asc" ? output.sort((a,b) => a-b) : output.sort((a,b) => b-a),
   $mapper: <T, K extends keyof T>(target: T & ObjectLit, output: T[K][]) => (callback: (value: T[K], index: number, array: T[K][]) => T[K]) => output.map(callback)
 }
 

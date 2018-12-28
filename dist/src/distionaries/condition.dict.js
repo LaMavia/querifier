@@ -15,7 +15,7 @@ exports.conditionSettings = {
     },
     $sort: (target, output) => (order) => 
     // @ts-ignore
-    order === "asc" ? output.sort((a, b) => a - b) : output.slice().reverse(),
+    order === "asc" ? output.sort((a, b) => a - b) : output.sort((a, b) => b - a),
     $mapper: (target, output) => (callback) => output.map(callback)
 };
 exports.conditionDictionary = {
