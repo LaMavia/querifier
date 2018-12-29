@@ -21,7 +21,7 @@ export function natifyUpdate(query: UpdateQuery): UpdateQuery {
     if(nativeq.find(x => x === key)) {
       outq[key] = query[key]
     } else if(typeof query[key] === "object") {
-      outq[key] = natifyCondition(query[key])
+      outq[key] = natifyCondition(query[key] as ConditionQuery)
     }
   }
 

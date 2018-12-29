@@ -19,20 +19,30 @@ function copyArray(arr) {
 }
 exports.copyArray = copyArray;
 function copyObj(obj) {
-    const out = {};
-    for (const prop in obj) {
-        const x = obj[prop];
-        if (checkers_1.isArray(obj[prop])) {
-            // @ts-ignore
-            out[prop] = copyArray(x);
-        }
-        else if (typeof copyObj === "object") {
-            out[prop] = copyObj(x);
-        }
-        else {
-            out[prop] = obj[prop];
+    let out;
+    if (obj instanceof Map) {
+        out = new Map(obj.entries());
+    }
+    else if (obj instanceof Set) {
+        out = new Set(obj.values());
+    }
+    else {
+        out = {};
+        for (const prop in obj) {
+            const x = obj[prop];
+            if (checkers_1.isArray(obj[prop])) {
+                // @ts-ignore
+                out[prop] = copyArray(x);
+            }
+            else if (checkers_1.isObject(x)) {
+                out[prop] = copyObj(obj[prop]);
+            }
+            else {
+                out[prop] = obj[prop];
+            }
         }
     }
+    // @ts-ignore
     return out;
 }
 exports.copyObj = copyObj;

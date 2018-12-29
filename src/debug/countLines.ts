@@ -59,6 +59,9 @@ function lines(path: string) {
 
 	return count
 }
+(async () => {
+	await lines("C:/Users/xelox/Projects/node/2test/server/src")
+})()
 console.log(2+43
 +34
 +31

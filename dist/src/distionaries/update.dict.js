@@ -5,16 +5,17 @@ const checkers_1 = require("../checkers");
 const condition_dict_1 = require("./condition.dict");
 const array_dict_1 = require("./array.dict");
 const update_1 = require("../update");
-exports.dictionary = {
+const changers_1 = require("../helpers/changers");
+exports.updateDictionary = {
     $set: (target) => (obj = index_1.throwError()) => {
         for (const prop in obj) {
-            if (typeof target[prop] !== typeof obj[prop]) {
+            if (typeof changers_1.getVal(target, prop) !== typeof obj[prop]) {
                 index_1.exception(`[$set]> typeof ${JSON.stringify(target[prop])} doesn't match typeof ${JSON.stringify(obj[prop])}`);
                 continue;
             }
             // Watchout for readonly props
             try {
-                target[prop] = obj[prop];
+                changers_1.set(target, prop, obj[prop]);
             }
             catch (e) {
                 index_1.exception(`[$set]> Error setting value of ${JSON.stringify(target[prop])}: "${e}"`);
@@ -28,15 +29,15 @@ exports.dictionary = {
                 index_1.exception(`[$inc]> ${JSON.stringify(obj[prop])} is not a number`);
                 continue;
             }
-            if (typeof target[prop] !== "number" || target[prop] === NaN) {
+            if (typeof changers_1.getVal(target, prop) !== "number" || changers_1.getVal(target, prop) === NaN) {
                 index_1.exception(`[$inc]> ${JSON.stringify(target[prop])} is not a number`);
                 continue;
             }
             try {
-                target[prop] = (target[prop] || 0) + (obj[prop] || 0);
+                changers_1.set(target, prop, (changers_1.getVal(target, prop) || 0) + (obj[prop] || 0));
             }
             catch (e) {
-                index_1.exception(`[$inc]> Error incrementing ${JSON.stringify(target[prop])}`);
+                index_1.exception(`[$inc]> Error incrementing ${JSON.stringify(changers_1.getVal(target, prop))}`);
             }
         }
         return target;
@@ -44,12 +45,12 @@ exports.dictionary = {
     $min: (target) => (obj = index_1.throwError()) => {
         for (const prop in obj) {
             try {
-                target[prop] = obj[prop] < target[prop]
+                changers_1.set(target, prop, obj[prop] < changers_1.getVal(target, prop)
                     ? obj[prop]
-                    : target[prop];
+                    : changers_1.getVal(target, prop));
             }
             catch (e) {
-                index_1.exception(`[$min]> Error setting ${target[prop]}`);
+                index_1.exception(`[$min]> Error setting ${changers_1.getVal(target, prop)}`);
             }
         }
         return target;
@@ -57,12 +58,12 @@ exports.dictionary = {
     $max: (target) => (obj = index_1.throwError()) => {
         for (const prop in obj) {
             try {
-                target[prop] = obj[prop] > target[prop]
+                changers_1.set(target, prop, obj[prop] > changers_1.getVal(target, prop)
                     ? obj[prop]
-                    : target[prop];
+                    : changers_1.getVal(target, prop));
             }
             catch (e) {
-                index_1.exception(`[$max]> Error setting ${target[prop]}`);
+                index_1.exception(`[$max]> Error setting ${changers_1.getVal(target, prop)}`);
             }
         }
         return target;
@@ -73,17 +74,17 @@ exports.dictionary = {
                 index_1.exception(`[$mul]> ${JSON.stringify(obj[prop])} is not a number`);
                 continue;
             }
-            if (typeof target[prop] !== "number" || target[prop] === NaN) {
-                index_1.exception(`[$mul]> ${JSON.stringify(target[prop])} is not a number`);
+            if (typeof changers_1.getVal(target, prop) !== "number" || changers_1.getVal(target, prop) === NaN) {
+                index_1.exception(`[$mul]> ${JSON.stringify(changers_1.getVal(target, prop))} is not a number`);
                 continue;
             }
             try {
-                target[prop] = target[prop]
-                    ? target[prop] * (obj[prop] || 1)
-                    : 0;
+                changers_1.set(target, prop, changers_1.getVal(target, prop)
+                    ? changers_1.getVal(target, prop) * (obj[prop] || 1)
+                    : 0);
             }
             catch (e) {
-                index_1.exception(`[$mul]> Error multiplying target[${prop}]`);
+                index_1.exception(`[$mul]> Error multiplying target[${prop}] => ${changers_1.getVal(target, prop)}`);
             }
         }
         return target;
@@ -97,37 +98,37 @@ exports.dictionary = {
                 index_1.exception(`[$rename]> ${obj[oldKey]} isn't a valid key`);
                 continue;
             }
-            if (target[oldKey]) {
-                val = target[oldKey];
-                delete target[oldKey];
+            if (changers_1.getVal(target, oldKey) !== undefined) {
+                val = changers_1.getVal(target, oldKey);
+                changers_1.del(target, oldKey);
             }
-            Object.assign(target, { [newKey]: val });
+            changers_1.set(changers_1.getPrelastValue(target, oldKey), newKey, val);
         }
         return target;
     },
     $unset: (target) => (obj = index_1.throwError()) => {
         for (const key in obj)
-            (key in target) && delete target[key];
+            (typeof changers_1.getVal(target, key) !== 'undefined') && changers_1.del(changers_1.getPrelastValue(target, key), changers_1.splitKeys(key)[1]);
         return target;
     },
     $addToSet: (target) => (obj = index_1.throwError()) => {
         for (const prop in obj) {
-            if (!checkers_1.isArray(target[prop])) {
+            if (!checkers_1.isArray(changers_1.getVal(target, prop))) {
                 index_1.exception(`[$addToSet]> "${prop}" is not an array`);
                 continue;
             }
             const valid = checkers_1.isArray(obj[prop])
-                ? obj[prop].filter((toAdd) => !target[prop].some((x) => x === toAdd))
-                : (target[prop].some((x) => x === obj[prop])
+                ? obj[prop].filter((toAdd) => !changers_1.getVal(target, prop).some((x) => x === toAdd))
+                : (changers_1.getVal(target, prop).some((x) => x === obj[prop])
                     ? null
                     : obj[prop]);
-            valid && target[prop].push(valid);
+            valid && changers_1.getVal(target, prop).push(valid);
         }
         return target;
     },
     $pull: (target) => (query = index_1.throwError()) => {
         for (const arrayName in query) {
-            let array = target[arrayName];
+            let array = changers_1.getVal(target, arrayName);
             if (!checkers_1.isArray(array)) {
                 index_1.exception(`[$pull]> "${arrayName}" is not an array`);
                 continue;
@@ -148,7 +149,7 @@ exports.dictionary = {
                 array = array.filter(x => x !== query[arrayName]);
             }
             try {
-                target[arrayName] = array;
+                changers_1.set(target, arrayName, array);
             }
             catch (e) {
                 index_1.exception(`[$pull]> Error setting value of "${arrayName}"`);
@@ -158,7 +159,7 @@ exports.dictionary = {
     },
     $pop: (target) => (query = index_1.throwError()) => {
         for (const key in query) {
-            const array = [...target[key]];
+            const array = changers_1.getVal(target, key);
             if (checkers_1.isArray(array)) {
                 switch (query[key]) {
                     case -1:
@@ -172,7 +173,7 @@ exports.dictionary = {
                         break;
                 }
                 try {
-                    target[key] = array;
+                    changers_1.set(target, key, array);
                 }
                 catch (e) {
                     index_1.exception(`[$pop]> Error setting value of "${key}"`);
@@ -183,7 +184,7 @@ exports.dictionary = {
     },
     $push: (target) => (query = index_1.throwError()) => {
         for (const key in query) {
-            let array = [...target[key]];
+            let array = changers_1.getVal(target, key); // [...target[key]] as any[]
             if (typeof query[key] === "object") {
                 for (const mod in query[key]) {
                     if (mod in array_dict_1.arrayDictionary) {
@@ -199,7 +200,7 @@ exports.dictionary = {
                 array.push(query[key]);
             }
             try {
-                target[key] = array;
+                changers_1.set(target, key, array);
             }
             catch (e) {
                 index_1.exception(`[$push]> Error setting value of "${key}"`);
@@ -210,11 +211,12 @@ exports.dictionary = {
     $each: (target) => (query) => {
         debugger;
         for (const arrn in query) {
-            if (target[arrn] && checkers_1.isArray(target[arrn])) {
-                for (const i in target[arrn]) {
-                    const obj = target[arrn][i];
+            const t = changers_1.getVal(target, arrn);
+            if (t && checkers_1.isArray(t)) {
+                for (const i in t) {
+                    const obj = t[i];
                     if (checkers_1.isObject(obj)) {
-                        target[arrn][i] = update_1.update(obj, query[arrn]);
+                        changers_1.set(changers_1.getVal(target, arrn), i, update_1.update(obj, query[arrn]));
                     }
                 }
             }

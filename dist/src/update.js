@@ -10,13 +10,18 @@ const copy_1 = require("./helpers/copy");
 exports.update = (object, query) => {
     const target = copy_1.copyObj(object);
     for (const prop in query) {
-        if (prop in update_dict_1.dictionary) {
+        if (prop in update_dict_1.updateDictionary) {
             // @ts-ignore
-            update_dict_1.dictionary[prop](target)(query[prop]);
+            update_dict_1.updateDictionary[prop](target)(query[prop]);
             // delete query[prop]
         }
         else {
-            target[prop] = query[prop];
+            if (target instanceof Map) {
+                target.set(prop, query[prop]);
+            }
+            else {
+                target[prop] = query[prop];
+            }
         }
     }
     return target;

@@ -3,7 +3,7 @@ import { isArray, isObject } from "../checkers";
 import { conditionDictionary, ConditionQuery, Conditionable } from "./condition.dict";
 import { ArrayQuery, arrayDictionary, Arrayable } from "./array.dict";
 import { update } from "../update"
-import { set, del, getVal } from "../helpers/changers";
+import { set, del, getVal, getPrelastValue, splitKeys } from "../helpers/changers";
 
 export interface UpdateQuery {
   [key: string]: unknown
@@ -56,16 +56,16 @@ export const updateDictionary: UpdateDictionary = {
         exception(`[$inc]> ${JSON.stringify(obj[prop])} is not a number`)
         continue
       }
-      if(typeof target[prop] !== "number" || target[prop] === NaN) {
+      if(typeof getVal(target, prop) !== "number" || getVal(target, prop) === NaN) {
         exception(`[$inc]> ${JSON.stringify(target[prop])} is not a number`)
         continue
       }
 
       try {
-        set(target, prop, (target[prop] || 0) + (obj[prop] || 0))
+        set(target, prop, (getVal(target, prop) || 0) + (obj[prop] || 0))
       } 
       catch (e) {
-        exception(`[$inc]> Error incrementing ${JSON.stringify(target[prop])}`)
+        exception(`[$inc]> Error incrementing ${JSON.stringify(getVal(target, prop))}`)
       }
     }
     
@@ -77,12 +77,12 @@ export const updateDictionary: UpdateDictionary = {
 	) => {
     for(const prop in obj) {
       try {
-        set(target, prop, obj[prop] < target[prop]
+        set(target, prop, obj[prop] < getVal(target, prop)
           ? obj[prop]
-          : target[prop])
+          : getVal(target, prop))
       } 
       catch (e) {
-        exception(`[$min]> Error setting ${target[prop]}`)
+        exception(`[$min]> Error setting ${getVal(target, prop)}`)
       }
     }
     
@@ -94,12 +94,12 @@ export const updateDictionary: UpdateDictionary = {
 	) => {
     for(const prop in obj) {
       try {
-        set(target, prop, obj[prop] > target[prop]
+        set(target, prop, obj[prop] > getVal(target, prop)
           ? obj[prop]
-          : target[prop])
+          : getVal(target, prop))
       } 
       catch (e) {
-        exception(`[$max]> Error setting ${target[prop]}`)
+        exception(`[$max]> Error setting ${getVal(target, prop)}`)
       }
     }
     
@@ -114,18 +114,18 @@ export const updateDictionary: UpdateDictionary = {
         exception(`[$mul]> ${JSON.stringify(obj[prop])} is not a number`)
         continue
       }
-      if(typeof target[prop] !== "number" || target[prop] === NaN) {
-        exception(`[$mul]> ${JSON.stringify(target[prop])} is not a number`)
+      if(typeof getVal(target, prop) !== "number" || getVal(target, prop) === NaN) {
+        exception(`[$mul]> ${JSON.stringify(getVal(target, prop))} is not a number`)
         continue
       }
 
       try {
-        set(target, prop, target[prop]
-          ? target[prop] * (obj[prop] || 1)
+        set(target, prop, getVal(target, prop)
+          ? getVal(target, prop) * (obj[prop] || 1)
           : 0)
       } 
       catch (e) {
-        exception(`[$mul]> Error multiplying target[${prop}]`)
+        exception(`[$mul]> Error multiplying target[${prop}] => ${getVal(target, prop)}`)
       }
     }
     
@@ -143,11 +143,11 @@ export const updateDictionary: UpdateDictionary = {
         exception(`[$rename]> ${obj[oldKey]} isn't a valid key`)
         continue
       }
-      if (target[oldKey]) {
-        val = target[oldKey]
+      if (getVal(target, oldKey) !== undefined) {
+        val = getVal(target, oldKey)
         del(target, oldKey)
       }
-      set(target, newKey, val)
+      set(getPrelastValue(target, oldKey), newKey, val)
     }
 
     return target
@@ -156,7 +156,7 @@ export const updateDictionary: UpdateDictionary = {
   $unset: <T extends ObjectLit>(target: T) => (
 		obj: ObjectLit = throwError()
   ) => {
-    for(const key in obj) (key in target)&& del(target, key)
+    for(const key in obj) (typeof getVal(target, key) !== 'undefined')&& del(getPrelastValue(target, key), splitKeys(key)[1])
     return target
   },
 
@@ -164,20 +164,20 @@ export const updateDictionary: UpdateDictionary = {
 		obj: ObjectLit = throwError()
 	) => {
 		for (const prop in obj) {
-			if (!isArray(target[prop])) {
+			if (!isArray(getVal(target, prop))) {
 				exception(`[$addToSet]> "${prop}" is not an array`)
 				continue
 			}
       
       const valid = isArray(obj[prop])
-        ? obj[prop].filter((toAdd: any) => !target[prop].some((x: any) => x === toAdd))
+        ? obj[prop].filter((toAdd: any) => !getVal(target, prop).some((x: any) => x === toAdd))
         : ( 
-          target[prop].some((x: any) => x === obj[prop])
+          getVal(target, prop).some((x: any) => x === obj[prop])
             ? null
             : obj[prop]
         )
 
-			valid&& (target[prop] as any[]).push(valid)
+			valid&& (getVal(target, prop) as any[]).push(valid)
 		}
 		return target
   },
@@ -186,7 +186,7 @@ export const updateDictionary: UpdateDictionary = {
 		query: ObjectLit & ConditionQuery = throwError()
 	) => {
     for(const arrayName in query) {
-      let array = target[arrayName] as any[]
+      let array = getVal(target, arrayName) as any[]
       if (!isArray(array)) {
 				exception(`[$pull]> "${arrayName}" is not an array`)
 				continue
@@ -222,7 +222,7 @@ export const updateDictionary: UpdateDictionary = {
 		query: ObjectLit & ConditionQuery = throwError()
 	) => {
     for(const key in query) {
-      const array = [...target[key]] as any[]
+      const array = getVal(target, key) as any[]
       if(isArray(array)) {
         switch (query[key]) {
           case -1: array.shift();break;
@@ -245,7 +245,7 @@ export const updateDictionary: UpdateDictionary = {
 		query: ObjectLit & ArrayQuery = throwError()
 	) => {
     for(const key in query) {
-      let array = target[key]// [...target[key]] as any[]
+      let array = getVal(target, key)// [...target[key]] as any[]
       if(typeof query[key] === "object") {
         for(const mod in query[key]) {
           if(mod in arrayDictionary) {
@@ -260,7 +260,7 @@ export const updateDictionary: UpdateDictionary = {
       }
 
       try {
-        target[key] = array
+        set(target, key, array)
       } catch (e) {
         exception(`[$push]> Error setting value of "${key}"`)
       }
@@ -272,9 +272,10 @@ export const updateDictionary: UpdateDictionary = {
   $each: <T extends ObjectLit>(target: T) => (query: {[arrayName: string]: UpdateQuery}) => {
     debugger
     for(const arrn in query) {
-      if (target[arrn] && isArray(target[arrn])) {
-        for(const i in target[arrn] as ObjectLit[]) {
-          const obj = target[arrn][i]
+      const t = getVal(target, arrn)
+      if (t && isArray(t)) {
+        for(const i in t as ObjectLit[]) {
+          const obj = t[i]
           if(isObject(obj)) {
             set(getVal(target, arrn), i, update(obj, query[arrn]))
           }

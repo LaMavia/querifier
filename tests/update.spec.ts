@@ -17,6 +17,11 @@ describe("Keeps types", () => {
 })
 
 describe("$addToSet", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { arr: [] }}
+		expect(update(o, { $addToSet: { 'a.arr': 1 } }).a.arr).toEqual([1])
+	})
+
 	it("Adds 1 to an array", () => {
 		const o = {
 			arr: [0],
@@ -74,6 +79,11 @@ describe("$addToSet", () => {
 })
 
 describe("$set", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { name: "John" }}
+		expect(update(o, { $set: { 'a.name': "Jimmy" } }).a.name).toEqual("Jimmy")
+	})
+
 	it("Sets 0 to 1", () => {
 		const o = {
 			a: 0,
@@ -107,6 +117,10 @@ describe("$set", () => {
 })
 
 describe("$inc", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { name: "John", age: 21 }}
+		expect(update(o, { $inc: { 'a.age': 1 } }).a).toEqual({ name: "John", age: 22 })
+	})
 	it("Increments target's prop", () => {
 		const o = { a: 1 }
 		expect(update(o, { $inc: { a: 2 } }).a).toBe(3)
@@ -134,6 +148,10 @@ describe("$inc", () => {
 })
 
 describe("$min", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { name: "John", age: 21 }}
+		expect(update(o, { $min: { 'a.age': 20 } }).a).toEqual({ name: "John", age: 20 })
+	})
 	it("Changes when called with smaller value", () => {
 		const o = { a: 20 }
 		expect(update(o, { $min: { a: 10 } }).a).toBe(10)
@@ -152,6 +170,10 @@ describe("$min", () => {
 })
 
 describe("$max", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { name: "John", age: 21 }}
+		expect(update(o, { $max: { 'a.age': 22 } }).a).toEqual({ name: "John", age: 22 })
+	})
 	it("Changes when called with bigger value", () => {
 		const o = { a: 20 }
 		expect(update(o, { $max: { a: 30 } }).a).toBe(30)
@@ -168,11 +190,11 @@ describe("$max", () => {
 		expect(o.a).toBe(43)
 	})
 })
-
-/**
- * @TODO add the test
- */
 describe("$mul", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { name: "John", age: 21 }}
+		expect(update(o, { $mul: { 'a.age': 2 } }).a).toEqual({ name: "John", age: 42 })
+	})
 	it("Multiplies target's prop", () => {
 		const o = { a: 1 }
 		expect(update(o, { $mul: { a: 2 } }).a).toBe(2)
@@ -200,6 +222,10 @@ describe("$mul", () => {
 })
 
 describe("$rename", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { name: "John", age: 21 }}
+		expect(update(o, { $rename: { 'a.age': "YearsLived" } }).a).toEqual({ name: "John", YearsLived: 21 })
+	})
 	it("Changes the key", () => {
 		const o = { oldKey: 2 }
 		expect(update(o, { $rename: { oldKey: "newKey" } })).toEqual({ newKey: 2 })
@@ -223,6 +249,10 @@ describe("$rename", () => {
 })
 
 describe("$unset", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { name: "John", age: 21 }}
+		expect(update(o, { $unset: { 'a.age': 0 } }).a).toEqual({ name: "John" })
+	})
 	it("Deletes defined prop", () => {
 		const o = { a: 1 }
 		expect(update(o, { $unset: { a: 0 } })).toEqual({})
@@ -246,10 +276,15 @@ describe("$pull", () => {
 		b: ["a", "b"],
 		c: [1, 5, 15],
 		d: ["James the dog", "Carl the dog", "Joe the cat"],
+		ia: {
+			arr: [1, 2, 3]
+		}
 	}
 	const c = Object.assign({}, o)
 	const a = [1, 2, 3, 4]
-
+	it("Works with the Dot Notation", () => {
+		expect(update(o, { $pull: { 'ia.arr': { $in: [2, 3] } } }).ia).toEqual({arr: [1]})
+	})
 	it("Pulls out single item", () => {
 		expect(update(o, { $pull: { a: 2 } }).a).toEqual([1, 3])
 		expect(update(o, { $pull: { b: "a" } }).b).toEqual(["b"])
@@ -371,6 +406,11 @@ describe("$pull", () => {
 })
 
 describe("$pop", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { arr: [1, 2, 3] }}
+		expect(update(o, { $pop: { 'a.arr': -1 } }).a).toEqual({ arr: [2, 3] })
+		expect(update(o, { $pop: { 'a.arr': 1 } }).a).toEqual({ arr: [1, 2] })
+	})
 	it("Pops element", () => {
 		const o = { a: [1, 2, 3, 4] }
 		expect(update(o, { $pop: { a: 1 } }).a).toEqual([1, 2, 3])
@@ -391,6 +431,11 @@ describe("$pop", () => {
 })
 
 describe("$push", () => {
+	it("Works with the Dot Notation", () => {
+		const o = {a: { arr: [1, 2, 3] }}
+		expect(update(o, { $push: { 'a.arr': 4 } }).a).toEqual({ arr: [1, 2, 3, 4] })
+		expect(update(o, { $push: { 'a.arr': {$each: [4]} } }).a).toEqual({ arr: [1, 2, 3, 4] })
+	})
 	it("Pushes an item", () => {
 		const o = { a: [1, 2] }
 		expect(update(o, { $push: { a: 3 } }).a).toEqual([1, 2, 3])
@@ -424,8 +469,39 @@ describe("$each", () => {
 				age: 7,
 			},
 		],
+		sth: {
+			people: [
+				{
+					name: "Jon",
+					pets: [
+						"Jack", "Bobby"
+					]
+				},
+				{
+					name: "Ann",
+					pets: [
+						"Billy", "Zu"
+					]
+				}
+			]
+		}
 	}
-
+	it("Works with the Dot Notation", () => {
+		expect(update(o, { $each: { 'sth.people': { $addToSet: { pets: "Jacob" } } } }).sth).toEqual({ people: [
+			{
+				name: "Jon",
+				pets: [
+					"Jack", "Bobby", "Jacob"
+				]
+			},
+			{
+				name: "Ann",
+				pets: [
+					"Billy", "Zu", "Jacob"
+				]
+			}
+		] })
+	})
 	it("Doesn't mutate the target", () => {
 		update(o, {
 			$each: {
