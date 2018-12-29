@@ -3,9 +3,10 @@ import { isArray, isObject } from "../checkers";
 import { conditionDictionary, ConditionQuery, Conditionable } from "./condition.dict";
 import { ArrayQuery, arrayDictionary, Arrayable } from "./array.dict";
 import { update } from "../update"
+import { set, del, getVal } from "../helpers/changers";
 
 export interface UpdateQuery {
-  [key: string]: any
+  [key: string]: unknown
   $set?: ObjectLit
   $inc?: ObjectLit
   $min?: ObjectLit
@@ -20,19 +21,24 @@ export interface UpdateQuery {
   $each?: {[arrayName: string]: UpdateQuery}
 }
 
-export const dictionary = {
+export interface UpdateDictionary {
+  [key: string]: <T extends ObjectLit>(target: T) 
+    => (params: ObjectLit | ObjectLit & ArrayQuery | any) => T
+}
+
+export const updateDictionary: UpdateDictionary = {
   $set: <T extends ObjectLit>(target: T) => (
 		obj: ObjectLit = throwError()
 	) => {
     for (const prop in obj) {
-      if(typeof target[prop] !== typeof obj[prop]) {
+      if(typeof getVal(target, prop) !== typeof obj[prop]) {
         exception(`[$set]> typeof ${JSON.stringify(target[prop])} doesn't match typeof ${JSON.stringify(obj[prop])}`)
         continue
       }
 
       // Watchout for readonly props
       try {
-        target[prop] = obj[prop]
+        set(target, prop, obj[prop])
       }
       catch(e) {
         exception(`[$set]> Error setting value of ${JSON.stringify(target[prop])}: "${e}"`)
@@ -56,7 +62,7 @@ export const dictionary = {
       }
 
       try {
-        target[prop] = (target[prop] || 0) + (obj[prop] || 0)
+        set(target, prop, (target[prop] || 0) + (obj[prop] || 0))
       } 
       catch (e) {
         exception(`[$inc]> Error incrementing ${JSON.stringify(target[prop])}`)
@@ -71,9 +77,9 @@ export const dictionary = {
 	) => {
     for(const prop in obj) {
       try {
-        target[prop] = obj[prop] < target[prop]
+        set(target, prop, obj[prop] < target[prop]
           ? obj[prop]
-          : target[prop]
+          : target[prop])
       } 
       catch (e) {
         exception(`[$min]> Error setting ${target[prop]}`)
@@ -88,9 +94,9 @@ export const dictionary = {
 	) => {
     for(const prop in obj) {
       try {
-        target[prop] = obj[prop] > target[prop]
+        set(target, prop, obj[prop] > target[prop]
           ? obj[prop]
-          : target[prop]
+          : target[prop])
       } 
       catch (e) {
         exception(`[$max]> Error setting ${target[prop]}`)
@@ -114,9 +120,9 @@ export const dictionary = {
       }
 
       try {
-        target[prop] = target[prop]
+        set(target, prop, target[prop]
           ? target[prop] * (obj[prop] || 1)
-          : 0
+          : 0)
       } 
       catch (e) {
         exception(`[$mul]> Error multiplying target[${prop}]`)
@@ -139,9 +145,9 @@ export const dictionary = {
       }
       if (target[oldKey]) {
         val = target[oldKey]
-        delete target[oldKey]
+        del(target, oldKey)
       }
-      Object.assign(target, { [newKey]: val })
+      set(target, newKey, val)
     }
 
     return target
@@ -150,7 +156,7 @@ export const dictionary = {
   $unset: <T extends ObjectLit>(target: T) => (
 		obj: ObjectLit = throwError()
   ) => {
-    for(const key in obj) (key in target)&& delete target[key]
+    for(const key in obj) (key in target)&& del(target, key)
     return target
   },
 
@@ -203,7 +209,7 @@ export const dictionary = {
       }
 
       try {
-        target[arrayName] = array
+        set(target, arrayName, array)
       } catch (e) {
         exception(`[$pull]> Error setting value of "${arrayName}"`)
       }
@@ -225,7 +231,7 @@ export const dictionary = {
         }
         
         try {
-          target[key] = array
+          set(target, key, array)
         } catch (e) {
           exception(`[$pop]> Error setting value of "${key}"`)
         }
@@ -239,7 +245,7 @@ export const dictionary = {
 		query: ObjectLit & ArrayQuery = throwError()
 	) => {
     for(const key in query) {
-      let array = [...target[key]] as any[]
+      let array = target[key]// [...target[key]] as any[]
       if(typeof query[key] === "object") {
         for(const mod in query[key]) {
           if(mod in arrayDictionary) {
@@ -270,7 +276,7 @@ export const dictionary = {
         for(const i in target[arrn] as ObjectLit[]) {
           const obj = target[arrn][i]
           if(isObject(obj)) {
-            target[arrn][i] = update(obj, query[arrn])
+            set(getVal(target, arrn), i, update(obj, query[arrn]))
           }
         }
       }

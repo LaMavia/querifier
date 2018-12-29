@@ -1,5 +1,5 @@
 
-import { dictionary, UpdateQuery } from "./distionaries/update.dict"
+import { updateDictionary, UpdateQuery } from "./distionaries/update.dict"
 
 import {
 	HighConditionQuery,

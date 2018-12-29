@@ -1,6 +1,6 @@
 {
   "name": "querifier",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Mongo query implementation for objects",
   "main": "./dist/src/index.js",
   "scripts": {

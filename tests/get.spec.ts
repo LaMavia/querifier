@@ -85,8 +85,8 @@ const a = {
 		{
 			name: "Pimpy",
 			age: 1,
-		}
-	])
+		},
+	]),
 }
 // Settings
 describe("$sort", () => {
@@ -100,8 +100,8 @@ describe("$sort", () => {
 				{
 					$sort: "asc",
 					$mapper(x: number) {
-						return x	
-					}
+						return x
+					},
 				}
 			)
 		).toEqual(a.primes)
@@ -242,7 +242,9 @@ describe("$exec", () => {
 					},
 				},
 				{
-					$mapper: ([_id, obj]: [string, Dog]): typeof obj & {_id: string} => {
+					$mapper: ([_id, obj]: [string, Dog]): typeof obj & {
+						_id: string
+					} => {
 						return {
 							...obj,
 							_id,
@@ -260,37 +262,45 @@ describe("$exec", () => {
 	})
 
 	it("Matches Sets", () => {
-		expect(get(a, {
-			cats: {
-				$exec(c: Cat) {
-					return c.age === 2
-				}
-			}
-		})).toEqual([
+		expect(
+			get(a, {
+				cats: {
+					$exec(c: Cat) {
+						return c.age === 2
+					},
+				},
+			})
+		).toEqual([
 			{
 				name: "Jelly",
 				age: 2,
-			}
+			},
 		])
 	})
 
 	it("Matches Sets with $mapper", () => {
-		expect(get(a, {
-			cats: {
-				$exec(c: Cat) {
-					return c.name === "jelly"
+		expect(
+			get(
+				a,
+				{
+					cats: {
+						$exec(c: Cat) {
+							return c.name === "jelly"
+						},
+					},
+				},
+				{
+					$mapper(c: Cat): Cat {
+						c.name = c.name.toLowerCase()
+						return c
+					},
 				}
-			}
-		}, {
-			$mapper(c: Cat): Cat {
-				c.name = c.name.toLowerCase()
-				return c
-			}
-		})).toEqual([
+			)
+		).toEqual([
 			{
 				name: "jelly",
 				age: 2,
-			}
+			},
 		])
 	})
 })

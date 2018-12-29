@@ -1,6 +1,7 @@
-import { dictionary, UpdateQuery } from "./distionaries/update.dict";
-import { copyObj } from "./helpers/copy";
-import { ObjectLit } from ".";
+import { updateDictionary, UpdateQuery } from "./distionaries/update.dict"
+import { copyObj } from "./helpers/copy"
+import { ObjectLit } from "."
+import { isArray } from "./checkers"
 
 /**
  * Not-mutating update function. Returns updated object
@@ -13,14 +14,17 @@ export const update = <T extends ObjectLit>(
 ): T => {
 	const target = copyObj(object)
 	for (const prop in query) {
-		if (prop in dictionary) {
+		if (prop in updateDictionary) {
 			// @ts-ignore
-			dictionary[prop](target)(query[prop])
+			updateDictionary[prop](target)(query[prop])
 			// delete query[prop]
 		} else {
-			target[prop] = query[prop]
+			if (target instanceof Map) {
+				target.set(prop, query[prop])
+			} else {
+				target[prop] = query[prop]
+			}
 		}
 	}
-
 	return target
 }

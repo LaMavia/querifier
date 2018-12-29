@@ -19,16 +19,21 @@ export function copyArray<T = any>(arr: nArr<T>): nArr<T> {
 }
 
 export function copyObj<T = ObjectLit>(obj: T): T {
-  const out: T = {} as T
-  for(const prop in obj) {
-    const x = obj[prop]
-    if(isArray(obj[prop])) {
-      // @ts-ignore
-      out[prop] = copyArray(x)
-    } else if(typeof copyObj === "object") {
-      out[prop] = copyObj(x)
-    } else {
-      out[prop] = obj[prop]
+  let out: T
+  if(obj instanceof Map) {
+    out = new Map(obj.entries()) as unknown as T
+  } else {
+    out = {} as T
+    for(const prop in obj) {
+      const x = obj[prop]
+      if(isArray(obj[prop])) {
+        // @ts-ignore
+        out[prop] = copyArray(x)
+      } else if(typeof copyObj === "object") {
+        out[prop] = copyObj(x)
+      } else {
+        out[prop] = obj[prop]
+      }
     }
   }
   return out
