@@ -62,15 +62,4 @@ function lines(path: string) {
 (async () => {
 	await lines("C:/Users/xelox/Projects/node/2test/server/src")
 })()
-console.log(2+43
-+34
-+31
-+64
-+14
-+14
-+159
-+286
-+16
-+87
-+40
-+54)
+console.log(137+10+430+13+60+178+38)

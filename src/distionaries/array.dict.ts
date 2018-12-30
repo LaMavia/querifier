@@ -5,7 +5,7 @@ export interface Arrayable {
 }
 
 export interface ArrayQuery {
-  $each: any[]
+  $each?: any[]
 }
 
 export const arrayDictionary = {

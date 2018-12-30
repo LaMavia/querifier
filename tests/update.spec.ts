@@ -434,7 +434,7 @@ describe("$push", () => {
 	it("Works with the Dot Notation", () => {
 		const o = {a: { arr: [1, 2, 3] }}
 		expect(update(o, { $push: { 'a.arr': 4 } }).a).toEqual({ arr: [1, 2, 3, 4] })
-		expect(update(o, { $push: { 'a.arr': {$each: [4]} } }).a).toEqual({ arr: [1, 2, 3, 4] })
+		expect(update(o, { $push: { 'a.arr': { $each: [4] } } }).a).toEqual({ arr: [1, 2, 3, 4] })
 	})
 	it("Pushes an item", () => {
 		const o = { a: [1, 2] }
@@ -487,17 +487,20 @@ describe("$each", () => {
 		}
 	}
 	it("Works with the Dot Notation", () => {
-		expect(update(o, { $each: { 'sth.people': { $addToSet: { pets: "Jacob" } } } }).sth).toEqual({ people: [
+		expect(update(o, { $each: { 'sth.people': { $pull: { pets: {$or: [
+			{ $eq: "Jack" },
+			{ $eq: "Zu" }
+		]} } } } }).sth).toEqual({ people: [
 			{
 				name: "Jon",
 				pets: [
-					"Jack", "Bobby", "Jacob"
+					"Bobby"
 				]
 			},
 			{
 				name: "Ann",
 				pets: [
-					"Billy", "Zu", "Jacob"
+					"Billy"
 				]
 			}
 		] })

@@ -1,12 +1,14 @@
 import { ObjectLit, exception, throwError } from "../index";
 import { isArray, isObject } from "../checkers";
-import { conditionDictionary, ConditionQuery, Conditionable } from "./condition.dict";
+import { conditionDictionary, ConditionQuery, Conditionable, HighConditionQuery } from "./condition.dict";
 import { ArrayQuery, arrayDictionary, Arrayable } from "./array.dict";
 import { update } from "../update"
 import { set, del, getVal, getPrelastValue, splitKeys } from "../helpers/changers";
 
+type TaT<T> = T | T[]
+
 export interface UpdateQuery {
-  [key: string]: unknown
+  [key: string]: unknown 
   $set?: ObjectLit
   $inc?: ObjectLit
   $min?: ObjectLit
@@ -15,15 +17,15 @@ export interface UpdateQuery {
   $rename?: ObjectLit
   $unset?: ObjectLit 
   $addToSet?: ObjectLit
-  $pull?: ConditionQuery
+  $pull?: {[k: string]: ConditionQuery | number | string | ObjectLit}
   $pop?: {[key: string]: number}
-  $push?: Arrayable
+  $push?: {[key: string]: ArrayQuery | TaT<number> | TaT<string>}
   $each?: {[arrayName: string]: UpdateQuery}
 }
 
 export interface UpdateDictionary {
   [key: string]: <T extends ObjectLit>(target: T) 
-    => (params: ObjectLit | ObjectLit & ArrayQuery | any) => T
+    => (params: ObjectLit & ArrayQuery | any) => T
 }
 
 export const updateDictionary: UpdateDictionary = {
@@ -183,7 +185,7 @@ export const updateDictionary: UpdateDictionary = {
   },
 
   $pull: <T extends ObjectLit>(target: T) => (
-		query: ObjectLit & ConditionQuery = throwError()
+		query: ConditionQuery = throwError()
 	) => {
     for(const arrayName in query) {
       let array = getVal(target, arrayName) as any[]

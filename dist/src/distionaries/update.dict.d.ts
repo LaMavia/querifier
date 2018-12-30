@@ -1,6 +1,7 @@
 import { ObjectLit } from "../index";
 import { ConditionQuery } from "./condition.dict";
-import { ArrayQuery, Arrayable } from "./array.dict";
+import { ArrayQuery } from "./array.dict";
+declare type TaT<T> = T | T[];
 export interface UpdateQuery {
     [key: string]: unknown;
     $set?: ObjectLit;
@@ -11,16 +12,21 @@ export interface UpdateQuery {
     $rename?: ObjectLit;
     $unset?: ObjectLit;
     $addToSet?: ObjectLit;
-    $pull?: ConditionQuery;
+    $pull?: {
+        [k: string]: ConditionQuery | number | string | ObjectLit;
+    };
     $pop?: {
         [key: string]: number;
     };
-    $push?: Arrayable;
+    $push?: {
+        [key: string]: ArrayQuery | TaT<number> | TaT<string>;
+    };
     $each?: {
         [arrayName: string]: UpdateQuery;
     };
 }
 export interface UpdateDictionary {
-    [key: string]: <T extends ObjectLit>(target: T) => (params: ObjectLit | ObjectLit & ArrayQuery | any) => T;
+    [key: string]: <T extends ObjectLit>(target: T) => (params: ObjectLit & ArrayQuery | any) => T;
 }
 export declare const updateDictionary: UpdateDictionary;
+export {};

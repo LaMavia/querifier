@@ -286,7 +286,7 @@ const object = {
 update(object, {
   $pull: {
     files: {
-      $match: /\.ts$/
+      $match: /\.js$/
     }
   }
 }) // -> { people: [...], files: ["index.ts", "get.ts", "update.ts"] }

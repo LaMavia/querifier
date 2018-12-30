@@ -1,2 +1,4 @@
 webpack.*.js
 .vscode
+./src/debug
+node_modules
