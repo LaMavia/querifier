@@ -1,7 +1,9 @@
 import fs from "fs-extra"
 import p from "path"
+const state = {
+	n: 0
+}
 function lines(path: string) {
-	let count = 0
 	const fileRegex = /.*\..*$/
 
 	function getNumOfLines(filePath: string): Promise<number> {
@@ -20,15 +22,15 @@ function lines(path: string) {
 				})
 				.on("end", () => {
 					// console.log(`[${filePath}]> ${out}`)
+					state.n += out
 					res(out)
 				})
 		})
 	}
 
 	if (fileRegex.test(path)) {
-    let o
-    getNumOfLines(path).then(x => o = x)
-    return o as unknown as number
+		getNumOfLines(path)
+		return
 	} else {
 		fs
 			.readdir(path)
@@ -36,17 +38,12 @@ function lines(path: string) {
 				for (const fname of x) {
 					if (fileRegex.test(fname)) {
 						getNumOfLines(p.resolve(path, fname)).then(
-							c => (console.log(c), (count += c))
+							c => state.n += c
 						)
 					} else {
-						count += lines(p.resolve(path, fname))
+						lines(p.resolve(path, fname))
 					}
         }        
-			})
-			.then(() => {
-				console.log(`
-          [${path}]> ${count} lines of code
-        `)
 			})
 			.catch(err => {
 				console.log(`
@@ -56,8 +53,6 @@ function lines(path: string) {
 				debugger
 			})
 	}
-
-	return count
 }
 (async () => {
 	await lines("C:/Users/xelox/Projects/node/2test/server/src")

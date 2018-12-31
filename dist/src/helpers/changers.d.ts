@@ -1,4 +1,6 @@
 import { ObjectLit } from "..";
+export declare type Keys<T> = T extends Map<infer K, unknown> ? K : keyof T;
+export declare type Vals<T> = T extends Map<unknown, infer V> ? V : T[keyof T];
 /**
  * Returns a tuple of: [Rest of the keys, Last key]
  * @param keys
@@ -11,9 +13,7 @@ export declare function splitKeys(...keys: string[]): [string, string];
  * @param {String | Number | Symbol} key
  * @param {any} value
  */
-export declare function set<T extends ObjectLit, K extends keyof T>(target: T, key: K, value: T[K]): T;
-export declare function del<T extends ObjectLit, K extends keyof T>(target: T, key: K): T;
-declare type Keys<T> = T extends Map<unknown, unknown> ? keyof T["entries"] : keyof T;
+export declare function set<T extends ObjectLit, K = Keys<T>>(target: T, key: K, value: T[K & string] | Vals<T>): T;
+export declare function del<T extends ObjectLit, K = Keys<T>>(target: T, key: K): T;
 export declare function getVal<T extends ObjectLit, K = Keys<T>>(target: T, ...keys: K[]): any;
 export declare function getPrelastValue<T extends ObjectLit, K = Keys<T>>(target: T, ...keys: K[]): any;
-export {};

@@ -13,8 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_extra_1 = __importDefault(require("fs-extra"));
 const path_1 = __importDefault(require("path"));
+const state = {
+    n: 0
+};
 function lines(path) {
-    let count = 0;
     const fileRegex = /.*\..*$/;
     function getNumOfLines(filePath) {
         return new Promise((res, rej) => {
@@ -32,14 +34,14 @@ function lines(path) {
             })
                 .on("end", () => {
                 // console.log(`[${filePath}]> ${out}`)
+                state.n += out;
                 res(out);
             });
         });
     }
     if (fileRegex.test(path)) {
-        let o;
-        getNumOfLines(path).then(x => o = x);
-        return o;
+        getNumOfLines(path);
+        return;
     }
     else {
         fs_extra_1.default
@@ -47,17 +49,12 @@ function lines(path) {
             .then(x => {
             for (const fname of x) {
                 if (fileRegex.test(fname)) {
-                    getNumOfLines(path_1.default.resolve(path, fname)).then(c => (console.log(c), (count += c)));
+                    getNumOfLines(path_1.default.resolve(path, fname)).then(c => state.n += c);
                 }
                 else {
-                    count += lines(path_1.default.resolve(path, fname));
+                    lines(path_1.default.resolve(path, fname));
                 }
             }
-        })
-            .then(() => {
-            console.log(`
-          [${path}]> ${count} lines of code
-        `);
         })
             .catch(err => {
             console.log(`
@@ -67,7 +64,6 @@ function lines(path) {
             debugger;
         });
     }
-    return count;
 }
 (() => __awaiter(this, void 0, void 0, function* () {
     yield lines("C:/Users/xelox/Projects/node/2test/server/src");

@@ -1,6 +1,9 @@
 import { ObjectLit } from ".."
 import { isArray } from "../checkers"
-import { keys } from "d3";
+
+export type Keys<T> = T extends Map<infer K, unknown> ? K : keyof T
+
+export type Vals<T> = T extends Map<unknown, infer V> ? V : T[keyof T]
 
 /**
  * Returns a tuple of: [Rest of the keys, Last key]
@@ -10,12 +13,11 @@ import { keys } from "d3";
 export function splitKeys(...keys: string[]): [string, string] {
 	const matched = keys.join(".").match(/(.*)*\.([\w\d]*)$/) as string[]
 	try {
-		return [matched[0], matched.length > 2 ? matched[2] : '']
+		return [matched[1], matched.length > 2 ? matched[2] : '']
 	} catch (err) {
 		console.error(`[<HELPER> splitKeys]> Error splitting "${keys}"`)
 		return [keys.splice(0, keys.length - 2).join('.'), keys[keys.length - 1]]
 	}
-	// const ks = keys.reduce((acc, k) => acc.concat(typeof k === "string" ? k.split(".") : ([k] as any)), [])
 }
 
 /**
@@ -24,37 +26,31 @@ export function splitKeys(...keys: string[]): [string, string] {
  * @param {String | Number | Symbol} key
  * @param {any} value
  */
-export function set<T extends ObjectLit, K extends keyof T>(
+export function set<T extends ObjectLit, K = Keys<T>>(
 	target: T,
 	key: K,
-	value: T[K]
+	value: T[K & string] | Vals<T>
 ): T {
 	const t = getPrelastValue(target, key)
-	let p // Last key
-	if(typeof key === 'string') {
-		const keys = key.split(".")
-		p = keys[keys.length - 1]
-	} else {
-		p = key
-	}
+	const [_, p] = splitKeys(key as any)
 
 	if (t instanceof Map) {
 		t.set(p, value)
 	} else if (t instanceof Set) {
 		t.add(value)
 	} else {
-		t[p] = value
+		t[isNaN(+p) || p !== String(+p) ? p : +p] = value
 	}
 
 	return target
 }
 
-export function del<T extends ObjectLit, K extends keyof T>(
+export function del<T extends ObjectLit, K = Keys<T>>(
 	target: T,
 	key: K
 ): T {
 	const t = getPrelastValue(target, key)
-	const [_, p] = splitKeys(key as string)
+	const [_, p] = splitKeys(key as any)
 	if (t instanceof Map) {
 		t.delete(p)
 	} else if (target instanceof Set) {
@@ -66,13 +62,14 @@ export function del<T extends ObjectLit, K extends keyof T>(
 	return target
 }
 
-type Keys<T> = T extends Map<unknown, unknown> ? keyof T["entries"] : keyof T
 export function getVal<T extends ObjectLit, K = Keys<T>>(
 	target: T,
 	...keys: K[]
 ): any {
-	let lastVal = target
-	for (const key of keys.reduce(
+	// Check if it's not just a weird key
+	let lastVal = target[keys[0] as any] || target
+	let s = target[keys[0] as any] ? 1 : 0
+	for (const key of keys.slice(s).reduce(
 		(acc, k) => acc.concat(typeof k === "string" ? k.split(".") : ([k] as any)),
 		[]
 	)) {
@@ -93,13 +90,6 @@ export function getPrelastValue<T extends ObjectLit, K = Keys<T>>(
 	target: T,
 	...keys: K[]
 ): any {
-	const matched = keys.join(".").match(/(.*)*\.[\w\d]*$/) as string[]
-	return getVal(
-		target,
-		...((
-			matched
-				? matched.length > 0 ? matched[1] : matched[0] || ""
-				: ''
-		).split("."))
-	)
-}
+	const [k, _] = splitKeys(...keys as any[])
+	return getVal(target, k)
+} 

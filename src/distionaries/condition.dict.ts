@@ -1,5 +1,5 @@
 import { throwError, exception, ObjectLit } from "../index";
-import { isArray } from "../checkers"
+import { isArray, compare } from "../checkers"
 
 export type ConditionableValue = ConditionQuery | string | symbol | number 
 
@@ -61,6 +61,7 @@ export interface ConditionQuery {
 
   $match?: RegExp
   $exec?: (item: unknown) => boolean
+  $each?: HighConditionQuery
 }
 
 interface ConDict { 
@@ -71,7 +72,7 @@ interface ConDict {
 
 export const conditionDictionary: ConDict = {
   $eq: <T>(condition: T = throwError()) => (item: T) => 
-    item === condition,
+    compare(condition, item),
   $ne: <T>(condition: T = throwError()) => (item: T) => 
     item !== condition,
   $gt: <T>(condition: T = throwError()) => (item: T) => 

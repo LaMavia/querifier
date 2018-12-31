@@ -8,13 +8,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function splitKeys(...keys) {
     const matched = keys.join(".").match(/(.*)*\.([\w\d]*)$/);
     try {
-        return [matched[0], matched.length > 2 ? matched[2] : ''];
+        return [matched[1], matched.length > 2 ? matched[2] : ''];
     }
     catch (err) {
         console.error(`[<HELPER> splitKeys]> Error splitting "${keys}"`);
         return [keys.splice(0, keys.length - 2).join('.'), keys[keys.length - 1]];
     }
-    // const ks = keys.reduce((acc, k) => acc.concat(typeof k === "string" ? k.split(".") : ([k] as any)), [])
 }
 exports.splitKeys = splitKeys;
 /**
@@ -25,14 +24,7 @@ exports.splitKeys = splitKeys;
  */
 function set(target, key, value) {
     const t = getPrelastValue(target, key);
-    let p; // Last key
-    if (typeof key === 'string') {
-        const keys = key.split(".");
-        p = keys[keys.length - 1];
-    }
-    else {
-        p = key;
-    }
+    const [_, p] = splitKeys(key);
     if (t instanceof Map) {
         t.set(p, value);
     }
@@ -40,7 +32,7 @@ function set(target, key, value) {
         t.add(value);
     }
     else {
-        t[p] = value;
+        t[isNaN(+p) || p !== String(+p) ? p : +p] = value;
     }
     return target;
 }
@@ -61,8 +53,10 @@ function del(target, key) {
 }
 exports.del = del;
 function getVal(target, ...keys) {
-    let lastVal = target;
-    for (const key of keys.reduce((acc, k) => acc.concat(typeof k === "string" ? k.split(".") : [k]), [])) {
+    // Check if it's not just a weird key
+    let lastVal = target[keys[0]] || target;
+    let s = target[keys[0]] ? 1 : 0;
+    for (const key of keys.slice(s).reduce((acc, k) => acc.concat(typeof k === "string" ? k.split(".") : [k]), [])) {
         let next;
         if (lastVal instanceof Map) {
             next = lastVal.get(key);
@@ -79,9 +73,7 @@ function getVal(target, ...keys) {
 }
 exports.getVal = getVal;
 function getPrelastValue(target, ...keys) {
-    const matched = keys.join(".").match(/(.*)*\.[\w\d]*$/);
-    return getVal(target, ...((matched
-        ? matched.length > 0 ? matched[1] : matched[0] || ""
-        : '').split(".")));
+    const [k, _] = splitKeys(...keys);
+    return getVal(target, k);
 }
 exports.getPrelastValue = getPrelastValue;

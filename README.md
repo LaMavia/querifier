@@ -22,6 +22,8 @@ Performes a not mutating action on an object
 ```
 Bisides accepting a classical ```key: value``` pairs, it accepts special operators, just like MongoDB queries.
 ## <div id="get">Get</div>
+### Basics
+#### Calling with conditions
 Performes a search operation on specified collections of an object. Accepts an object, `ConditionQuery` and `options`
 >Example
 ```typescript
@@ -40,7 +42,25 @@ Performes a search operation on specified collections of an object. Accepts an o
   }, {
     $sort: "asc"
   })
-  // -> [1, 2, 3, 4, 5]
+  // -> [0, 1, 2, 3, 4, 5]
+``` 
+#### Calling without conditions
+If called without any conditions, but with a collection name, returns an arrayified version of the said collection. 
+But if no collections are specified, returns an empty array.
+>Example
+```typescript
+  const object = {
+    evens: [0, 2, 4, 6, 8],
+    odds: [1, 3, 5, 7, 9]
+  }
+
+  get(object, {
+    evens: {},
+    odds: {}
+  }) // -> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+  get(object, {}) // -> []
+  get(object)     // -> []
 ```  
 ### <div id="operators">Operators:</div>
 #### $set

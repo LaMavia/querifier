@@ -32,6 +32,7 @@ export interface ConditionQuery {
     $type?: "number" | "symbol" | "function" | "object" | "array" | "boolean" | "string" | "undefined";
     $match?: RegExp;
     $exec?: (item: unknown) => boolean;
+    $each?: HighConditionQuery;
 }
 interface ConDict {
     [key: string]: <T>(condition: any) => (item: T) => boolean;

@@ -1,4 +1,5 @@
 import { get } from "../src/get"
+import { arrayify } from "../src/helpers/arayify";
 interface User {
 	name: string
 	age: number
@@ -87,7 +88,47 @@ const a = {
 			age: 1,
 		},
 	]),
+	ppl: [
+		{
+			name: "Ann",
+			father: {
+				name: "John"
+			}
+		},
+		{
+			name: "Bill",
+			father: {
+				name: "Steve"	
+			}
+		},
+		{
+			name: "Steve",
+			father: {
+				name: "Bob"		
+			}
+		},
+	]
 }
+
+describe("Basic mechanics", () => {
+	it("Returns collections when called without conditions", () => {
+		expect(get(a, {
+			dogs: {}
+		})).toEqual(arrayify(a.dogs))
+
+		expect(get(a, {
+			dogs: {},
+			cats: {}
+		})).toEqual(arrayify(a.dogs).concat(arrayify(a.cats)).sort())
+	})
+
+	it("Doesn't throw an error when calling for a non-existing collection", () => {
+		expect(get(a, {
+			// @ts-ignore
+			nonExisting: {}
+		})).toEqual([])
+	})
+})
 // Settings
 describe("$sort", () => {
 	it("asc", () => {
@@ -146,6 +187,23 @@ describe("Injects wanted values", () => {
 describe("$eq", () => {
 	it("Works", () => {
 		expect(get(a, { primes: { $lte: 7 } })).toEqual([1, 2, 3, 5, 7])
+	})
+
+	it("Works with the Dot notation", () => {
+		expect(get(a, {
+			'ppl': {
+				$eq: {
+					'father.name': "Bob"
+				}
+			}
+		})).toEqual([
+			{
+				name: "Steve",
+				father: {
+					name: "Bob"		
+				}
+			}
+		])
 	})
 })
 

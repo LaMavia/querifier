@@ -19,7 +19,7 @@ exports.conditionSettings = {
     $mapper: (target, output) => (callback) => output.map(callback)
 };
 exports.conditionDictionary = {
-    $eq: (condition = index_1.throwError()) => (item) => item === condition,
+    $eq: (condition = index_1.throwError()) => (item) => checkers_1.compare(condition, item),
     $ne: (condition = index_1.throwError()) => (item) => item !== condition,
     $gt: (condition = index_1.throwError()) => (item) => item > condition,
     $gte: (condition = index_1.throwError()) => (item) => item >= condition,
