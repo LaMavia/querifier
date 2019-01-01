@@ -1,4 +1,4 @@
-import { UpdateQuery } from "./distionaries/update.dict";
+import { UpdateQuery } from "./dictionaries/update.dict";
 import { natifyCondition as _nc, natifyUpdate as _nu } from "./helpers/nativfy";
 import { get } from "./get";
 export interface ObjectLit {

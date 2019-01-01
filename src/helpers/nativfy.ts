@@ -1,5 +1,5 @@
-import { UpdateQuery } from "../distionaries/update.dict";
-import { ConditionQuery } from "../distionaries/condition.dict";
+import { UpdateQuery } from "../dictionaries/update.dict";
+import { ConditionQuery } from "../dictionaries/condition.dict";
 
 export function natifyUpdate(query: UpdateQuery): UpdateQuery {
   const nativeq = [

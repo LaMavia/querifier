@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const condition_dict_1 = require("./distionaries/condition.dict");
+const condition_dict_1 = require("./dictionaries/condition.dict");
 const _1 = require(".");
 const copy_1 = require("./helpers/copy");
 const checkers_1 = require("./checkers");

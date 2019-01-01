@@ -55,6 +55,9 @@ function lines(path: string) {
 	}
 }
 (async () => {
+	await lines("C:/Users/xelox/Projects/node/querifier/src")
 	await lines("C:/Users/xelox/Projects/node/2test/server/src")
+	setTimeout(() => {
+		console.log(`Lines of code: ${state.n}`)
+	}, 3000)
 })()
-console.log(137+10+430+13+60+178+38)

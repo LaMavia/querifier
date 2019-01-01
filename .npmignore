@@ -1,4 +1,6 @@
 webpack.*.js
 .vscode
-./src/debug
+./src/
+./tests/
 node_modules
+tsconfig*.json

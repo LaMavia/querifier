@@ -1,4 +1,4 @@
-import { ConditionQuery, ConditionSettings, conditionDictionary, conditionSettings } from "./distionaries/condition.dict";
+import { ConditionQuery, ConditionSettings, conditionDictionary, conditionSettings } from "./dictionaries/condition.dict";
 import { ObjectLit, exception } from ".";
 import { copyObj } from "./helpers/copy";
 import { isArray } from "./checkers";

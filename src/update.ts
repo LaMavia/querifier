@@ -1,4 +1,4 @@
-import { updateDictionary, UpdateQuery } from "./distionaries/update.dict"
+import { updateDictionary, UpdateQuery } from "./dictionaries/update.dict"
 import { copyObj } from "./helpers/copy"
 import { ObjectLit } from "."
 import { isArray } from "./checkers"

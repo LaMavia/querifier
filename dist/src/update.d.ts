@@ -1,4 +1,4 @@
-import { UpdateQuery } from "./distionaries/update.dict";
+import { UpdateQuery } from "./dictionaries/update.dict";
 import { ObjectLit } from ".";
 /**
  * Not-mutating update function. Returns updated object

@@ -1,9 +1,9 @@
 
-import { updateDictionary, UpdateQuery } from "./distionaries/update.dict"
+import { updateDictionary, UpdateQuery } from "./dictionaries/update.dict"
 
 import {
 	HighConditionQuery,
-} from "./distionaries/condition.dict"
+} from "./dictionaries/condition.dict"
 import { isArray } from "./checkers"
 import { arrayify } from "./helpers/arayify"
 import { copyObj } from "./helpers/copy";
